@@ -8,26 +8,14 @@ from .server import RawFeatures
 ProcessedFeatures = namedtuple(
     'ProcessedFeatures',
     [
-         'latency_mean_min_ratio', 'nacks_received', 'bandwidth',
-        'rtt_packet_delay', 'cur_rate', 'action', 'qlength_reward', 'input_rate', 'qlength',
-        'rtt_reward', 'bytes_sent', 'tx_rate',
+        'nack_ratio', 'cnp_ratio', 'bandwidth',
+        'rtt_packet_delay', 'cur_rate', 'action',
+        'rtt_reward', 'bytes_sent', 'monitor_interval_width',
     ]
 )
 
-def normalize_max_min(value, min_value, max_value, a=-1, b=1):
-    """ 
-    Normalize values using max and min such that they lie within the interval [a, b]
-    """
-    norm_value = (b-a)*(value - min_value) / (max_value - min_value) + a
-    return np.clip(norm_value, a_min=a, a_max=b)
 
-def unnoramlize_min_max(value, min_value, max_value, a=-1, b=1):
-    """ 
-    Reverse normalization values using max and min
-    """
-    return (value - a)*(max_value - min_value) / (b - a) + min_value
-
-def calc_rtt_reward(config, rtt, rate):
+def calc_rtt_reward(config, rtt_inflation, rate):
     """Calculates RTT reward function (rtt_inflation * sqrt(rate))
     reward function needs to be equal to target
 
@@ -49,36 +37,10 @@ def calc_rtt_reward(config, rtt, rate):
     Returns:
         [float]: inflation value
     """
-        # rate = 1 - rate
-    # rtt_inflation = (rtt - max_factor) / 1024
-    rtt_inflation = max((rtt / config.agent.deterministic.base_rtt) - config.agent.deterministic.max_factor, 0)
+    rtt_inflation = max(rtt_inflation - config.agent.deterministic.beta, 0)
     reward = rtt_inflation * np.sqrt(rate)
-    reward = (reward - config.agent.deterministic.target) * config.agent.deterministic.factor
+    reward = (reward - config.agent.deterministic.target) * config.agent.deterministic.scale
     return reward
-
-def calc_tele_reward(config, qlen, rate):
-    """Calculates qlength reward value in telemetry mode (qlength_inflation * sqrt(rate))
-    reward function needs to be equal to target
-
-    Args:
-        qlen ([float]): normalized queue length values
-        rate ([float]): current rate
-        factor ([float]): 
-        max_factor ([float]): threshold qlength value (below this threshold set reward to 0)
-        power ([float]): take power of function
-        calc_method ([str], optional): different methods to calculate reward Defaults to None.
-
-    Returns:
-        [float]: reward value
-    """
-    # max_rate = 0.0488 # constant calculatd as 100 Gbits in units of 256bytes/nanoseconds
-    # rtt_inflation = 1 + qlen / (max_rate * config.agent.deterministic.base_rtt)
-    # reward = max(rtt_inflation - config.agent.deterministic.max_factor,0) * np.sqrt(rate)
-    # return (reward - config.agent.deterministic.target)*config.agent.deterministic.factor
-    # print(config.env)
-    qlen_percent = qlen / config.env.buffer_size # 4096 = 10 MiB which is current buffer size in .ini
-    reward = max(qlen_percent - config.agent.deterministic.max_factor,0) * np.sqrt(rate)
-    return (reward - config.agent.deterministic.target)*config.agent.deterministic.factor
 
 class FeatureHistory:
     """
@@ -90,7 +52,7 @@ class FeatureHistory:
     """
     def __init__(self, config, simulation_number):
         self.config = config
-        self.number_of_features = len(self.config.agent.agent_features) #TODO understand why do we need to do len for a string???
+        self.number_of_features = len(self.config.agent.agent_features) 
         self.state_history_dict = {}
         self.action_history_dict = {}
         self.prev_action_history_dict = {}
@@ -138,18 +100,14 @@ class FeatureHistory:
         :return: The processed features.
         """
         return ProcessedFeatures(
-            latency_mean_min_ratio=raw_features.rtt_packet_delay * 1. / .44,  # 0.44 - empty system RTT
-            nacks_received=raw_features.nacks_received,
-            bandwidth=raw_features.bytes_sent * 1. / (raw_features.rtt_packet_delay) ,
+            nack_ratio=raw_features.nacks_received * 1. / max(raw_features.packets_sent, 1.),
+            cnp_ratio=raw_features.cnps_received * 1. / max(raw_features.packets_sent, 1.),
+            bandwidth=raw_features.bytes_sent * 1. / (raw_features.monitor_interval_width) ,
             bytes_sent=raw_features.bytes_sent,
-            rtt_packet_delay=raw_features.rtt_packet_delay,
+            rtt_inflation=raw_features.rtt_packet_delay,
             cur_rate = raw_features.cur_rate,
             action=self._get_action(raw_features.host, raw_features.flow_tag),
-            tx_rate=raw_features.tx_rate,
             rtt_reward=calc_rtt_reward(self.config, raw_features.rtt_packet_delay, raw_features.cur_rate),
-            input_rate=raw_features.input_rate, # we only concentrate on cases where the switch rate is under the optimal value (1.0)
-            qlength=raw_features.qlength,
-            qlength_reward=calc_tele_reward(self.config, raw_features.qlength, raw_features.cur_rate),
         )
 
     def process_observation(self, host: str, flow_tag: str, ip_mode: float) -> Tuple[np.ndarray, Dict, ProcessedFeatures]:
@@ -168,18 +126,15 @@ class FeatureHistory:
             for required_feature in self.config.agent.agent_features:
                 feature = getattr(self.state_history_dict[key][idx], required_feature)
                 features.append(feature)
-        # features.append(ip_mode)
 
         logging_information = dict(
-            # nacks_received=self.state_history_dict[key][-1].nacks_received,
+            nack_ratio=self.state_history_dict[key][-1].nack_ratio,
+            cnp_ratio=self.state_history_dict[key][-1].cnp_ratio,
             rate=self.state_history_dict[key][-1].cur_rate,
             rtt_reward=self.state_history_dict[key][-1].rtt_reward,
-            qlength_reward=self.state_history_dict[key][-1].qlength_reward,
-            input_rate=self.state_history_dict[key][-1].input_rate,
-            rtt_latency=self.state_history_dict[key][-1].rtt_packet_delay,
-            qlength=self.state_history_dict[key][-1].qlength,
+            rtt_inflation=self.state_history_dict[key][-1].rtt_inflation,
+            bandwidth=self.state_history_dict[key][-1].bandwidth,
             action=self.state_history_dict[key][-1].action,
-            tx_rate=self.state_history_dict[key][-1].tx_rate,
         )
 
         return np.array(features).flatten(), logging_information, self.state_history_dict[key][-1]

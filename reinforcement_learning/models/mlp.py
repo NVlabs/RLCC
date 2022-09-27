@@ -40,26 +40,20 @@ class MLP(nn.Module):
 
 
     def forward(self, x: torch.tensor,  hc: Tuple[torch.tensor, torch.tensor] = None ) -> Tuple[torch.tensor, Tuple[torch.tensor, torch.tensor]]:
-        # print(f'input: {x}')
         for layer in self.net:
             x = layer(x)
-            # print(f'input_layer: {x}')
         if self.rnn is not None:
             if len(x.shape) == 1:
                 x = x.unsqueeze(0)
             if self.rnn_type == 'LSTM':
                 hc = self.rnn(x, hc)
-                # print(f'lstm output: {x}')
             else:
                 if hc is None:
                     hc = self.rnn(x, hc)
-                    # print(f'rnn output: {x}')
                 else:
                     hc = self.rnn(x, hc[0])
-                    # print(f'rnn output from previous hc: {x}')
                 hc = (hc, hc)
             x = hc[0]
         x = self.output_layer(x)
-        # print(f'final output: {x}')
         return x, hc
 

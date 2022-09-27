@@ -97,19 +97,11 @@ class DummyVecEnvWithResetInfo(VecEnv):
             else:
                 obs_tuple, self.buf_infos[i] = data # reset
                 self.buf_rews[i] = 0
-            # ignore = self.buf_infos[i]['ignore']
-            # if ignore:
-            #     print(f"ignore flow_tag: {self.buf_infos[i]['flow_tag']}")
-            # ignore = False
             if isinstance(obs_tuple, (tuple, list)):
                 for t, x in enumerate(obs_tuple):
                     self.buf_obs[t][i] = x
             else:
                 self.buf_obs[0][i] = obs_tuple
-            #     j = j + 1
-            # if j >= 10:
-            #     print(f"error with ignoring flow: {self.buf_infos[i]['key']}")
-            
         return self.buf_obs, self.buf_rews, self.buf_dones, self.buf_infos
 
     def reset(self):

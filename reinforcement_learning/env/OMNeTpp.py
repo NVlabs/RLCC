@@ -11,8 +11,6 @@ from config.constants import py_to_c_scenarios, many2one_r_to_h_and_q, all2all_r
 from .utils.feature_history import FeatureHistory
 from .utils.server import Server
 
-NAMES = {'RL_PerDest_LongSimult_AllToAll': 'all2all', 'RL_PerDest_LongSimult_ManyToOne': 'many2one', 'RL_Telemetry_PerDest_LongSimult_AllToAll': 'all2all', 'RL_Telemetry_PerDest_LongSimult_ManyToOne': 'many2one',
-'RL_Telemetry_LongSimult_AllToAll': 'all2all', 'RL_Telemetry_LongSimult_ManyToOne': 'many2one'}
 class OMNeTpp(gym.Env):
     """
     A GYM wrapper for the OMNeTpp simulator.
@@ -27,50 +25,22 @@ class OMNeTpp(gym.Env):
         if config.agent.evaluate:
             scenario += '_test'
 
-        qp_mode = 'qp' in scenario
-        self.ip_mode = float('ip' in scenario)
-        telemetry_mode = '_t' in scenario
-        shortsim = 'short' in scenario
-
-        #to remove 
-        #to remove
         scenario_name_used = scenario
-        scenario = scenario.replace('_short', '')
-        scenario = scenario.replace('_qp', '')
-        scenario = scenario.replace('_ip', '')
-        scenario = scenario.replace('_t', '')
+
 
         self.scenario_name, test_number, config_num_tests = py_to_c_scenarios[scenario]
 
         algo_name = 'RL_'
 
-        if telemetry_mode:
-            algo_name += 'Telemetry_'
-
-        if not qp_mode:
-            algo_name += 'PerDest_'
         self.scenario_name = algo_name + self.scenario_name
-
-        self.longshort = 'LongShort' in self.scenario_name
         print(f"Scenario: {scenario_name_used} -> {self.scenario_name} -r {test_number} ")
 
 
         self.port = self.config.env.default_port + simulation_number + self.config.env.port_increment
 
-        self.test_number = test_number + (simulation_number + self.config.env.port_increment) * config_num_tests #TODO what it is used for?
+        self.test_number = test_number + (simulation_number + self.config.env.port_increment) * config_num_tests 
         self.env_running = False
-
-        if 'ManyToOne' in self.scenario_name:
-            H, Q = many2one_r_to_h_and_q[test_number].values()
-            self.nb_flows = H if not qp_mode else H * Q
-        else: # alltoall
-            H, Q = all2all_r_to_h_and_q[test_number].values()
-            self.nb_flows = H*(H-1) if not qp_mode else H * Q * (H-1)
-
         
-        self.H = H
-        self.Q = Q
-
         self.feature_history = FeatureHistory(self.config, simulation_number)
 
         self.server = Server(self.config, self.port)
@@ -91,7 +61,7 @@ class OMNeTpp(gym.Env):
         """
         In order to run OMNeT we need to ensure that several environment variables are set.
         """
-        if 'simulations' not in os.getcwd():
+        if 'simulations' not in os.getcwd(): # TODO go over with Yuval and see how to change paths here
             os.chdir(self.config.env.omnet.simulator_path)
             os.environ['LD_LIBRARY_PATH'] = '/lib64/:$LD_LIBRARY_PATH:/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.102-4.b14.el7.x86_64/jre/lib/amd64/jli/'
             os.environ['NEDPATH'] = '../src:../FW/Algorithm:../DCTrafficGen/src'
@@ -117,12 +87,13 @@ class OMNeTpp(gym.Env):
             time.sleep(0.001)
 
         print(f"restarting env: {self.scenario}")
+        print(f'{self.config.env.omnet.exe_path} {self.config.env.omnet.config_path} -c {self.scenario_name} -r {str(self.test_number)}')
         subprocess.Popen([
             self.config.env.omnet.exe_path, self.config.env.omnet.config_path,
             '-c', self.scenario_name,
             '-r', str(self.test_number), '-u' ,'Cmdenv',
-             ], close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-            #  ])
+            #  ], close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+             ])
         #    
         
         self.env_running = True
@@ -162,7 +133,7 @@ class OMNeTpp(gym.Env):
             # print('reseting env')
             return self.reset()
         self.feature_history.update_history(raw_features)
-        # print(f"scenario: {self.scenario_name}, host: {raw_features.host}, flow: {raw_features.flow_tag}")
+      
         state, info, processed_features = self.feature_history.process_observation(raw_features.host, raw_features.flow_tag, self.ip_mode)
 
         # Calculate the reward.
@@ -174,8 +145,6 @@ class OMNeTpp(gym.Env):
 
         # Update the information dict.
         key = self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag
-
-        # print(f"flow: {key} - reward: {reward}, action: {action}, rtt: {raw_features.rtt_packet_delay},cur_rate: {raw_features.cur_rate}")
 
         info.update(dict(key=key, reward=reward, num_flows=self.nb_flows, host=raw_features.host, qp=raw_features.flow_tag, env_num=self.env_number))
         # print(f"state: {state} scenario: {self.scenario_name}")
@@ -192,7 +161,7 @@ class OMNeTpp(gym.Env):
         """
 
         if self.config.env.reward == 'general':
-            reward = (action - 1) - info['latency'] * 0.1 - info['cnp_ratio'] - int(info['nack_ratio'] > 0) * 1000
+            reward = (action - 1) - info['rtt_inflation'] * 0.1 - info['cnp_ratio'] - int(info['nack_ratio'] > 0) * 1000
         elif self.config.env.reward == 'distance':
             optimal_rate = 1. / int(self.scenario.split('_')[0])
             reward = - (info['bandwidth'] * 1. / 12.5 - optimal_rate) ** 2
@@ -200,9 +169,7 @@ class OMNeTpp(gym.Env):
             if info['cnp_ratio'] > 2:
                 reward = -1
             else:
-                reward = action - 1. - info['latency'] * 0.1
-        elif self.config.env.reward == 'input_rate':
-            reward = info['qlength_reward'] + (info['switch_rate'] - 1)* self.config.agent.deterministic.input_rate_loss_coeff
+                reward = action - 1. - info['rtt_inflation'] * 0.1
         else:
             reward = info[self.config.env.reward]
         return reward

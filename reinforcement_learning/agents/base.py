@@ -92,16 +92,12 @@ class BaseAgent:
             for env_info in infos:
                 test, host, qp = env_info['key'].split('_')[-1].split('/')
                 qp_mode = '_qp' in env_info['key']
-                # test_name = '_'.join(env_info['key'].split('/')[0].split('_')[:-1])
-                # if test_name not in self.log_key_hist.keys() or self.log_key_hist[test_name] < self.config.logging.num_tests_to_log:
-                #     self.log_key_hist[test_name] += 1
                 flow_limit_check = True
                 if self.config.logging.limit_flows is not None:
                     flow_limit_check = (int(host) < self.config.logging.limit_hosts and int(qp) < self.config.logging.limit_qps)
 
                 for key, value in env_info.items():
                     if key not in ['flow_tag', 'host', 'qp', 'rtt_reward', 'qlength_reward', 'cwnd']:
-                        #limit the data that is logged in chen dataset.
                         if  int(test) < self.config.logging.num_tests_to_log and flow_limit_check:
                             if key not in ['key']:
                                 data_name = 'qp_' + key + '/' + env_info['key'] if qp_mode else 'destip_' + key + '/' + env_info['key']
@@ -111,12 +107,9 @@ class BaseAgent:
                                 self.logging_data[data_name].append(value)
 
             if timesteps % self.config.logging.min_log_interval == 0:
-                # print(f'logging to wandb at timestep: {timesteps}')
                 for key, value in self.logging_data.items():
                     if isinstance(value, list) and len(value) > 0:
                         if isinstance(value, torch.Tensor):
                             value = value.cpu()
-                        # print(key, value)
                         self.config.logging.wandb.log({key: np.mean(value)}, step=timesteps)
-                        # self.config.logging.wandb.log({key: value}, step=timesteps)
                         del self.logging_data[key][:]

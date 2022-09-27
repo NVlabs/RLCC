@@ -1,0 +1,8 @@
+FW: All firmware code
+   Algorithm : code the algorithms and their context header file. 
+   Mellanox : the CC shell - the Mellanox private wrapper
+   include : all include files required to compile the algorithms
+           platform : contains all supported platforms
+                    x86_64 : the simulator code
+                    irisc : for compiling IRISC code
+                    riscv : for compiling RISCV code

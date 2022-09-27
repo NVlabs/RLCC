@@ -4,7 +4,7 @@ import sys
 
 import yaml
 
-ROOT_PATH = r'/swgwork/bfuhrer/projects/rlcc/new_simulator/reinforcement_learning/'
+ROOT_PATH = r'/swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/reinforcement_learning/'
 sys.path.append(ROOT_PATH)
 
 class Config(dict):

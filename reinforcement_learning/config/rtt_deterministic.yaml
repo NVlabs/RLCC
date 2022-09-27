@@ -14,41 +14,24 @@ env:
   envs_per_scenario: 1
   history_length: 1
   omnet:
-    recv_len: 9  # number of features received from the OMNeT simulator
-    size_of_data: 4  # size of float or uint32_t
-    simulator_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/prog_cc_demo/simulations #../simulator  # relative to reinforcement_learning dir ##FIXME changed path
-    exe_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/prog_cc_demo/out/gcc-release/src/ccsim #../bin/ccsim_release  # relative to run_path ##FIXME
-    config_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/prog_cc_demo/simulations/tests.ini #FIXME#ccsim.ini # relative to run_path
+    simulator_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/simulations #../simulator  # relative to reinforcement_learning dir ##FIXME changed path
+    exe_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/out/gcc-release/src/ccsim #../bin/ccsim_release  # relative to run_path ##FIXME
+    config_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/simulations/tests.ini #FIXME#ccsim.ini # relative to run_path
   reward: rtt_reward
   default_port: 5555   #5555
   port_increment: 0
-  buffer_size: 4096.0 # buffersize in units of 256bytes = 10MiB
-  save_path: '/swgwork/bfuhrer/projects/rlcc/new_simulator/reinforcement_learning/saved_models/ip_mode'
+  save_path: '/swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/reinforcement_learning/saved_models/'
 
 training:
-  max_timesteps: 600000 #6000000 #400000 #200000
   max_num_updates: 250
   learning_rate: 0.01
   gradient_clip: 0.5
-  # gradient_clip: 0.0
   replay_size: 1000000
-
-quantization:
-  quantization_path: /swgwork/bfuhrer/projects/rl_packages/TensorRT/tools/pytorch-quantization/pytorch_quantization
-  max_timesteps: 300000
-  max_num_updates: 80
-  quantization_method: entropy
-  lstm_LUT: False
-  fine_tune: False
-  num_bins: 2048
 
 agent:
   save_name: ''
-  save_quant_name: ''
   checkpoint: ''
   evaluate: False
-  quantization: False
-  m_quantization: False
   agent_type: DETERMINISTIC
   agent_features:
     - action
@@ -59,27 +42,20 @@ agent:
   deterministic:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2
-    # rollout_length: 128 #rl = rrl*max(num_flows) over all environments 
-    rollout_length: 10 #rl = rrl*max(num_flows) over all environments  
+    rollout_length: 1024
     architecture:
       - 12
     use_rnn: null
-    target: 0.8 # 2 for rtt, 0.2 for buffer util
+    target: 0.8
     action_loss_coeff: 1
-    power: 1
-    max_factor: 1.5
+    beta: 1.5
     loss_scale: 10.0
-    factor: 10.0
-    use_dynamic_target: False
+    scale: 10.0
     bias: False
     constraint: buffer
     reward_calc_method: null
     loss_batch: 0 # use batch of agents in rollout instead of all agents
     leaky_relu: 0.0
-    rtt_inflation_max: 1286.239624 # calculated empirically from trained model with good results on 4 H 1024 QPs M2O
-    rtt_inflation_min: 0
-    norm_reward: False # to normalize reward to [-1 , 1] as input to model (not for loss!)
-    balance_loss: False
     warmup_updates: 20
     warmup_length: 1024
     max_batch_size: 8192

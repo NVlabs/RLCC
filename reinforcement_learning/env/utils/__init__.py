@@ -1,0 +1,3 @@
+RECV_LENGTH = 9
+SIZE_OF_DATA = 4 # size of float
+BASE_RTT = 8192.0

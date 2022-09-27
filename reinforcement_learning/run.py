@@ -1,5 +1,6 @@
 import argparse
 import sys
+import os
 
 import torch
 
@@ -12,9 +13,7 @@ try:
 except:
     wandb = None
 
-wandb = None
-
-sys.path.append(r'/swgwork/bfuhrer/projects/rlcc/new_simulator/reinforcement_learning/')
+sys.path.append(os.getcwd())
 
 def main(config: Config) -> None:
     """
@@ -28,8 +27,6 @@ def main(config: Config) -> None:
         agent = AGENTS[config.agent.agent_type](config, env)
         if config.agent.evaluate:
             agent.test()
-        elif config.agent.quantization and not config.quantization.fine_tune:
-            agent.calibration()
         else:
             agent.train()
         env.close()
@@ -47,19 +44,15 @@ if __name__ == '__main__':
     parser.add_argument('--agent', dest='agent_type', type=str,
                         choices=['PPO', 'DQN', 'SUPERVISED', 'random', 'CONSTRAINED', 'DETERMINISTIC', 'None'],
                         default='DETERMINISTIC')
-    parser.add_argument('--port_increment', type=int, default=10)  # To enable multiple simulations at once, #0 default
+    parser.add_argument('--port_increment', type=int, default=1)  # To enable multiple simulations at once, #0 default
 
     # Env Parameters
-    parser.add_argument('--scenarios', type=str, default=['4_1_qp'], nargs='*') #['1024_to_1', '2048_to_1', '4096_to_1', '8192_to_1','2_to_1', '4_to_1', '8_to_1']
+    parser.add_argument('--scenarios', type=str, default=['4_1'], nargs='*') #['1024_to_1', '2048_to_1', '4096_to_1', '8192_to_1','2_to_1', '4_to_1', '8_to_1']
     # parser.add_argument('--scenarios', type=str, default=['2_1_qp', '4_1_qp', '8_1_qp', '4_8_a2a_qp', '8_16_a2a_qp', '32_1_qp', '8_16_a2a_qp', '16_32_a2a_qp'], nargs='*') #['1024_to_1', '2048_to_1', '4096_to_1', '8192_to_1','2_to_1', '4_to_1', '8_to_1']
     parser.add_argument('--envs_per_scenario', type=int, default=1)
     parser.add_argument('--max_timesteps', type=int, default=-1)
     parser.add_argument('--history_length', type=int, default=2)
     parser.add_argument('--evaluate', action='store_true') #FIXME
-    parser.add_argument('--quantization', action='store_true')
-    parser.add_argument('--quantization_method', type=str, default='mse') #'percentile'
-    parser.add_argument('--m_quantization', action='store_true')
-    parser.add_argument('--lstm_LUT', action='store_true')
     parser.add_argument('--fine_tune', action='store_true')
     parser.add_argument('--num_bins', type=int, default=-1)
     parser.add_argument('--log_data', action='store_true')
@@ -73,7 +66,6 @@ if __name__ == '__main__':
 
     # Learning Parameters
     parser.add_argument('--save_name', default='rtt_debug', type=str) 
-    parser.add_argument('--save_quant_name', default='quant_rtt_based_model_wo_b', type=str) 
     parser.add_argument('--checkpoint', default='', type=str) #FIXME
 
     parser.add_argument('--learning_rate', default=0.01, type=float)
@@ -160,10 +152,7 @@ if __name__ == '__main__':
     else:
         wandb = None
     config.logging.wandb = wandb
-    if not config.agent.m_quantization:
-        config.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    else:
-        config.device = 'cpu'
+    config.device = 'cuda' if torch.cuda.is_available() else 'cpu'
     # print(config.agent.save_name)
     print(config)
     main(config)
