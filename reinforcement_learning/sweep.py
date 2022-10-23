@@ -97,7 +97,7 @@ if __name__ == '__main__':
     archtecture = [[32, 16], [16, 16], [8, 8], [4, 4]]
 
     hyperparameter_defaults = dict(
-        default_config='rtt_deterministic',
+        default_config='rtt_adpg',
         additional_agent_feature_0=None,
         additional_agent_feature_1=None,
         additional_agent_feature_2=None,
@@ -114,10 +114,10 @@ if __name__ == '__main__':
     config.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     save_name = sweep_config.default_config
-    config.agent.deterministic.architecture = archtecture[sweep_config.architecture_index]
-    save_name += '_arch_' + '_'.join(map(str, config.agent.deterministic.architecture))
+    config.agent.adpg.architecture = archtecture[sweep_config.architecture_index]
+    save_name += '_arch_' + '_'.join(map(str, config.agent.adpg.architecture))
 
-    config.agent.deterministic.use_lstm = sweep_config.use_lstm
+    config.agent.adpg.use_lstm = sweep_config.use_lstm
     if sweep_config.additional_agent_feature_0 is not None:
         config.agent.agent_features.append(sweep_config.additional_agent_feature_0)
         save_name += f'_{sweep_config.additional_agent_feature_0}'

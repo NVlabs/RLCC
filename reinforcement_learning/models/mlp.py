@@ -8,6 +8,8 @@ import math
 from torch.nn import functional as F
 
 RNN_TO_MODEL = {'LSTM': nn.LSTMCell, 'GRU': nn.GRUCell, 'RNN': nn.RNNCell}
+
+
 class MLP(nn.Module):
     def __init__(self, input_size: int, output_size: int,  lrelu_coeff: float, hidden_sizes: List[int], use_rnn: str=None, bias=False,
      device: torch.device=torch.device('cpu')):
@@ -37,7 +39,6 @@ class MLP(nn.Module):
 
         # self.output_layer = init_(nn.Linear(previous_dim, output_size))
         self.output_layer = init_(nn.Linear(previous_dim, output_size, bias=bias))
-
 
     def forward(self, x: torch.tensor,  hc: Tuple[torch.tensor, torch.tensor] = None ) -> Tuple[torch.tensor, Tuple[torch.tensor, torch.tensor]]:
         for layer in self.net:

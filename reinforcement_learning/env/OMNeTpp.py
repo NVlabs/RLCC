@@ -27,14 +27,12 @@ class OMNeTpp(gym.Env):
 
         scenario_name_used = scenario
 
-
         self.scenario_name, test_number, config_num_tests = py_to_c_scenarios[scenario]
 
         algo_name = 'RL_'
 
         self.scenario_name = algo_name + self.scenario_name
         print(f"Scenario: {scenario_name_used} -> {self.scenario_name} -r {test_number} ")
-
 
         self.port = self.config.env.default_port + simulation_number + self.config.env.port_increment
 
@@ -74,7 +72,6 @@ class OMNeTpp(gym.Env):
         Environment randomness is set by the simulator and is not controlled from here.
         """
         pass
-
 
     def reset(self) -> Tuple[np.ndarray, Dict]:
         """
@@ -149,7 +146,6 @@ class OMNeTpp(gym.Env):
         info.update(dict(key=key, reward=reward, num_flows=self.nb_flows, host=raw_features.host, qp=raw_features.flow_tag, env_num=self.env_number))
         # print(f"state: {state} scenario: {self.scenario_name}")
         return state, reward, False, info
-
 
     def _calculate_reward(self, action: float, info: Dict) -> float:
         """

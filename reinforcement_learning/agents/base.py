@@ -6,7 +6,6 @@ from baselines.common.vec_env import VecEnv
 from config.config import Config
 from collections import defaultdict
 
-# ROOT_PATH = '/swgwork/bfuhrer/projects/rlcc/new_simulator/reinforcement_learning'
 
 class BaseAgent:
     """
@@ -59,7 +58,7 @@ class BaseAgent:
                 if 'amax' not in key:
                     data = value.clone().cpu().numpy()
                     data = data.reshape(np.prod(data.shape))
-                    hidden_dim  = self.config.agent.deterministic.architecture[0]
+                    hidden_dim = self.config.agent.adpg.architecture[0]
                     if 'rnn' in key: 
                         data = data.reshape(hidden_dim, np.prod(data.shape) // hidden_dim)
                         for i in range(hidden_dim):
@@ -80,7 +79,7 @@ class BaseAgent:
                 pass
         file_list = os.listdir(f'{self.save_path}' + name)
         filename = [f for f in file_list if self.config.agent.agent_type + checkpoint in f and '.txt' not in f]
-        checkpoint_state_dict =  torch.load(f'{self.save_path}' + name + '/' + filename[0])
+        checkpoint_state_dict = torch.load(f'{self.save_path}' + name + '/' + filename[0])
         self.model.load_state_dict(checkpoint_state_dict['model_state_dict'])
         # self.optimizer.load_state_dict(checkpoint_state_dict['optimizer_state_dict'])
 
@@ -97,8 +96,9 @@ class BaseAgent:
                     flow_limit_check = (int(host) < self.config.logging.limit_hosts and int(qp) < self.config.logging.limit_qps)
 
                 for key, value in env_info.items():
+                    # env_info items to ignore during logging
                     if key not in ['flow_tag', 'host', 'qp', 'rtt_reward', 'qlength_reward', 'cwnd']:
-                        if  int(test) < self.config.logging.num_tests_to_log and flow_limit_check:
+                        if int(test) < self.config.logging.num_tests_to_log and flow_limit_check:
                             if key not in ['key']:
                                 data_name = 'qp_' + key + '/' + env_info['key'] if qp_mode else 'destip_' + key + '/' + env_info['key']
 

@@ -12,3 +12,4 @@ scripts/
 *.so
 *anf
 ext_release_files/
+.idea/

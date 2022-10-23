@@ -27,21 +27,22 @@ from models.mlp import MLP
 import random
 
 
-class Deterministic(BaseAgent):
-    def __init__(self, config: Config, env: VecEnv): #TODO module it,make it simple to follow
+class ADPG(BaseAgent):
+    def __init__(self, config: Config, env: VecEnv):
         BaseAgent.__init__(self, config, env)
 
         self.model = MLP(
             input_size=env.observation_space.shape[0],
             output_size=1,
-            # activation_function=self.config.agent.activation_function,
-            hidden_sizes=self.config.agent.deterministic.architecture,
-            use_rnn=self.config.agent.deterministic.use_rnn,
-            bias=self.config.agent.deterministic.bias,
-            lrelu_coeff=self.config.agent.deterministic.leaky_relu,
+            hidden_sizes=self.config.agent.adpg.architecture,
+            use_rnn=self.config.agent.adpg.use_rnn,
+            bias=self.config.agent.adpg.bias,
+            lrelu_coeff=self.config.agent.adpg.leaky_relu_coeff,
             device=self.config.device,
         ).to(self.config.device)
+
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.config.training.learning_rate, eps=1e-5)            # self.optimizer = optim.SGD(self.model.parameters(), lr=self.config.training.learning_rate)
+
         if self.config.agent.evaluate:
             self.load_model()
                 
@@ -52,16 +53,14 @@ class Deterministic(BaseAgent):
         if self.config.logging.wandb is not None:
             self.config.logging.wandb.watch(self.model, log=None, log_freq=1000)
 
-
     def _init_hidden(self) -> Tuple[torch.tensor, torch.tensor]:
         """
         :return: A tuple representing a newly initialized hidden LSTM state for a newly encountered agent.
         """
         return (
-            torch.zeros(self.config.agent.deterministic.architecture[-1], device=self.config.device),
-            torch.zeros(self.config.agent.deterministic.architecture[-1], device=self.config.device)
+            torch.zeros(self.config.agent.adpg.architecture[-1], device=self.config.device),
+            torch.zeros(self.config.agent.adpg.architecture[-1], device=self.config.device)
         )
-
 
     def test(self) -> None:
         state, infos = self.env.reset()
@@ -103,10 +102,10 @@ class Deterministic(BaseAgent):
         flows = [env_i.nb_flows for env_i in self.env.envs]
         total_num_flows = sum(flows)
         rollout_counter = {}
-        warmup_updates = self.config.agent.deterministic.warmup_updates
-        warmup_length = self.config.agent.deterministic.warmup_length
+        warmup_updates = self.config.agent.adpg.warmup_updates
+        warmup_length = self.config.agent.adpg.warmup_length
 
-        print(f'Update policy after a minimum of : {self.config.agent.deterministic.rollout_length} steps per flow after a warmup of: {warmup_updates} updates of {warmup_length} total steps')
+        print(f'Update policy after a minimum of : {self.config.agent.adpg.rollout_length} steps per flow after a warmup of: {warmup_updates} updates of {warmup_length} total steps')
         while num_updates <= self.config.training.max_num_updates:
             # Perform a rollout
             min_counter = 0
@@ -114,7 +113,7 @@ class Deterministic(BaseAgent):
 
             is_warmup = num_updates < warmup_updates
             with torch.no_grad():
-                while warmup_step < warmup_length if is_warmup else min_counter < self.config.agent.deterministic.rollout_length:
+                while warmup_step < warmup_length if is_warmup else min_counter < self.config.agent.adpg.rollout_length:
                     hc = []
                     for info in infos:
                         if info['key'] in hc_dict:
@@ -148,8 +147,8 @@ class Deterministic(BaseAgent):
                     min_counter = min(rollout_counter.values())
 
                     self.log_data(timesteps, infos)
-                    if warmup_step > self.config.agent.deterministic.max_step_size:
-                        print(f"break steps : {warmup_step}>{self.config.agent.deterministic.max_step_size}")
+                    if warmup_step > self.config.agent.adpg.max_step_size:
+                        print(f"break steps : {warmup_step}>{self.config.agent.adpg.max_step_size}")
                         break
 
             agent_steps = [len(self.rollout[agent_key]['reward']) for agent_key in self.rollout.keys() if len(self.rollout[agent_key]['reward']) > 0]
@@ -172,7 +171,6 @@ class Deterministic(BaseAgent):
 
         self.save_model(checkpoint=timesteps, loss=reward_loss + action_loss)
 
-
     def _parse_action(self, actions: torch.tensor) -> List[float]:
         """
         Convert the action from a network output value to a rate multiplier value accepted by the environment.
@@ -183,9 +181,9 @@ class Deterministic(BaseAgent):
         actions = flatten(actions.cpu().numpy())
         for i, action in enumerate(actions):
             if action < 0:
-                action = 1. / (1. - action * self.config.agent.deterministic.action_multiplier_dec)
+                action = 1. / (1. - action * self.config.agent.adpg.action_multiplier_dec)
             else:
-                action = 1. + action * self.config.agent.deterministic.action_multiplier_inc
+                action = 1. + action * self.config.agent.adpg.action_multiplier_inc
             actions[i] = action
         return actions
 
@@ -199,21 +197,20 @@ class Deterministic(BaseAgent):
         :param hc: The hidden state of the LSTM (if applicable).
         :return: The action to be performed at this state and the updated LSTM hidden state (if applicable).
         """
-        action, hc = self.model(state, hc) #TODO need to pass float32 or anything else in the end so it would add it to tanh
-        action = torch.tanh(action)  #factor the output to be between -1 to 1
+        action, hc = self.model(state, hc)
+        action = torch.tanh(action)
         return action, hc
-
 
     def _calculate_loss(self, timesteps, eps=1e-8) -> float:
         """
-        Calculate the loss for the deterministic agent:
+        Calculate the loss for the adpg agent:
         Action smoothing loss is added to push sequential actions to be similar (stabilize the output).
         :return: The loss (scalar value).
         """
         agents = [key for key in list(self.rollout.keys()) if len(self.rollout[key]['reward']) > 1]
-        if self.config.agent.deterministic.loss_batch > 0:
+        if self.config.agent.adpg.loss_batch > 0:
             random.shuffle(agents)
-            agents = random.sample(agents, min(self.config.agent.deterministic.loss_batch, len(agents)))
+            agents = random.sample(agents, min(self.config.agent.adpg.loss_batch, len(agents)))
         
         def get_loss(action, reward, batch_size, scenario, sl, a_sl, scenario_loss, gamma):
             """
@@ -247,17 +244,16 @@ class Deterministic(BaseAgent):
         total_steps = np.sum([len(self.rollout[agent_key]['reward']) for agent_key in agents])
         self.optimizer.zero_grad()
 
-        
         for agent_key in agents:
             agent_rollout = self.rollout[agent_key]
 
             scenario, _, _ = agent_key.split('/')
             rewards = torch.tensor(agent_rollout['reward'], device=self.config.device)
             
-            batch_size = min(len(rewards), self.config.agent.deterministic.max_batch_size, len(agent_rollout['state']))
+            batch_size = min(len(rewards), self.config.agent.adpg.max_batch_size, len(agent_rollout['state']))
             rewards = rewards[:batch_size]
 
-            if self.config.agent.deterministic.use_rnn:
+            if self.config.agent.adpg.use_rnn:
                 hc = None
                 actions = []
                 for state in agent_rollout['state'][:batch_size]:
@@ -272,11 +268,11 @@ class Deterministic(BaseAgent):
 
             scenario_loss_agents[scenario] += 1
 
-            action_loss_coeff = self.config.agent.deterministic.action_loss_coeff
-            agent_reward_loss, agent_action_loss = get_loss(actions, rewards, batch_size, scenario, self.config.agent.deterministic.loss_scale, action_loss_coeff, scenario_loss, self.config.agent.discount)
+            action_loss_coeff = self.config.agent.adpg.action_loss_coeff
+            agent_reward_loss, agent_action_loss = get_loss(actions, rewards, batch_size, scenario, self.config.agent.adpg.loss_scale, action_loss_coeff, scenario_loss, self.config.agent.discount)
             agent_reward_loss = agent_reward_loss / num_agents
             agent_action_loss = agent_action_loss / num_agents
-            if self.config.agent.deterministic.balance_loss:
+            if self.config.agent.adpg.balance_loss:
                 ideal_timesteps = total_steps / agent_rollout['num_flows']
                 agent_reward_loss = agent_reward_loss * (ideal_timesteps / batch_size)
                 agent_action_loss = agent_action_loss * (ideal_timesteps / batch_size)
@@ -291,14 +287,6 @@ class Deterministic(BaseAgent):
         self.optimizer.step()
         
         for key in scenario_loss_agents.keys():
-            scenario_loss[key] = scenario_loss[key] / num_agents# divide scenario loss by number of agents per scenario
+            scenario_loss[key] = scenario_loss[key] / num_agents  # divide scenario loss by number of agents per scenario
         # return parts of loss for monitoring/debugging
-        return  total_reward_loss, total_action_loss , scenario_loss, num_agents
-
-        
-
-        
-
-
-
-        
+        return total_reward_loss, total_action_loss, scenario_loss, num_agents

@@ -22,7 +22,7 @@ training:
 agent:
   save_name: ''
   evaluate: False
-  agent_type: DETERMINISTIC
+  agent_type: ADPG
   agent_features:
     - action
     - cnp_ratio
@@ -37,7 +37,7 @@ agent:
 #    - requested_rate
   linear_lr_decay: False
   activation_function: relu
-  deterministic:
+  adpg:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2
     rollout_length: 1024

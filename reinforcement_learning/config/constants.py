@@ -1,10 +1,10 @@
-from agents.deterministic import Deterministic
+from agents.adpg import ADPG
 from agents.dqn import DQN
 from agents.ppo import PPO
 from agents.random import RandomAgent
 from agents.supervised import Supervised
 
-AGENTS = {'PPO': PPO, 'DQN': DQN, 'SUPERVISED': Supervised, 'DETERMINISTIC': Deterministic, 'RANDOM': RandomAgent}
+AGENTS = {'PPO': PPO, 'DQN': DQN, 'SUPERVISED': Supervised, 'ADPG': ADPG, 'RANDOM': RandomAgent}
 
 """
 2_1_qp 4_1_qp 8_1_qp 2_4_a2a_qp 4_8_a2a_qp 8_16_a2a_qp 32_1_qp

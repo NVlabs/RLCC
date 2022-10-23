@@ -37,9 +37,9 @@ def calc_rtt_reward(config, rtt_inflation, rate):
     Returns:
         [float]: inflation value
     """
-    rtt_inflation = max(rtt_inflation - config.agent.deterministic.beta, 0)
+    rtt_inflation = max(rtt_inflation - config.agent.adpg.beta, 0)
     reward = rtt_inflation * np.sqrt(rate)
-    reward = (reward - config.agent.deterministic.target) * config.agent.deterministic.scale
+    reward = (reward - config.agent.adpg.target) * config.agent.adpg.scale
     return reward
 
 class FeatureHistory:

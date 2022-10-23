@@ -32,14 +32,14 @@ agent:
   save_name: ''
   checkpoint: ''
   evaluate: False
-  agent_type: DETERMINISTIC
+  agent_type: ADPG
   agent_features:
     - action
     - rtt_reward
   discount: .99
   linear_lr_decay: False
   activation_function: relu
-  deterministic:
+  adpg:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2
     rollout_length: 1024
@@ -53,9 +53,8 @@ agent:
     scale: 10.0
     bias: False
     constraint: buffer
-    reward_calc_method: null
     loss_batch: 0 # use batch of agents in rollout instead of all agents
-    leaky_relu: 0.0
+    leaky_relu_coeff: 0.0
     warmup_updates: 20
     warmup_length: 1024
     max_batch_size: 8192

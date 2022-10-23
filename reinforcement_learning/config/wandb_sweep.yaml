@@ -2,7 +2,7 @@ program: sweep.py
 method: grid
 parameters:
   default_config:
-    values: [telemetry_deterministic, rtt_deterministic, cnp_deterministic]
+    values: [telemetry_adpg, rtt_adpg, cnp_adpg]
   additional_agent_feature_0:
     values: [switch_rate]
   additional_agent_feature_1:
