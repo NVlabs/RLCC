@@ -1,190 +1,113 @@
-# Git Large File Storage
+# OLD README from NBU AI repo - TO DO change this
+# RLCC / Analytic Deterministic Policy Gradient (ADPG) DestIP Mode  - Telemetry-based version
+## Project Commitment
+### Project Definition
+* Team Name:  Networking Research 
+* Manager: Yuval Shpigelman 
+* Challenge: Mellanox CC algorithms don’t work
+* AI Goal: Develop a good AI CC algorithm.
+* Definition of success: Perform better than the exiting Mellanox CC algorithms (emphasis on SWIFT).
+* Data Source and Availability:  Using a CX6DX simulator 
+* Value: Competitive Mellanox CC ability 
+* Due Date: With the release of CX8, a year from now
 
-![CI status][1]
+### Project’s team
+* AI: Doron Haritan, Benjamin Fuhrer
+* Domain Expert: Yuval Shpigelman 
+* Arch: Gal Yefet
+* Coding: NA
 
-[1]: https://github.com/git-lfs/git-lfs/workflows/CI/badge.svg
+## Project overview:
+Implementation of RL Congestion control in production environemnt by converting RLCC/ADPG to work in DestIP mode with Telemetry.
 
-[Git LFS](https://git-lfs.github.com) is a command line extension and
-[specification](docs/spec.md) for managing large files with Git.
+## Simulator
+* The simulator that was used in the Training/Testing of the model is an omnet simulator that mimics CX6DX, and was programmed by Yuval  Shpigelman
+* In each new terminal we open we need to define the MknxCCSimsetop (TO enable the simulator). To do so run:
+    ```
+    cd ./simulator
+    source MlnxCCSimSetup
+    ```
 
-The client is written in Go, with pre-compiled binaries available for Mac,
-Windows, Linux, and FreeBSD. Check out the [website](http://git-lfs.github.com)
-for an overview of features.
+* The simulator is located in the dir: ./simulator. The relevant C files are located in the ./simulator/FW/Algorithm
+* To compile the relevant c files on the simulator run the following commends from the dir ./simulator/FW/Algorithm
+    ```
+    make MODE=debug -B
+    make MODE=release -B
+    ```
+    After each change in the c files we need to compile them again.
+* To config the runs on the simulator (no need in recompiling after each change) use the file ./simulator/sim/ccsim.ini.
 
-## Getting Started
+    Examples of things we can config in this file are: duration of the test  and per algorithm define its relevant c file (be defining the algorithm name) and the scenarios it can run on.
+* How to run the simulator.
+    ```
+    cd ./simulator/sim/
+    ../bin/ccsim_release ccsim.ini -c <Config> -r <Run number>
+    ```
 
-### Downloading
+    c in the relevant ccsim.ini file and r is the run number.
+    The run number will define the test case that would run on the simulator. To define the run number we will use the following calculation ( the test num and the config_num_tests are taken from the file ./config/constants.py):
+     test_number + (simulation_number + config.env.port_increment) * config_num_tests
 
-You can install the Git LFS client in several different ways, depending on your
-setup and preferences.
+    The python scripts calculate the run number automatically, and opens a socket with the simulator during the run (can be seen in the file env/OMNeTpp.py)
 
-* **Linux users**. Debian and RPM packages are available from
-  [PackageCloud](https://packagecloud.io/github/git-lfs/install).
-* **macOS users**. [Homebrew](https://brew.sh) bottles are distributed, and can
-  be installed via `brew install git-lfs`.
-* **Windows users**. Git LFS is included in the distribution of
-  [Git for Windows](https://gitforwindows.org/). Alternatively, you can
-  install a recent version of Git LFS from the [Chocolatey](https://chocolatey.org/) package manager.
-* **Binary packages**. In addition, [binary packages](https://github.com/git-lfs/git-lfs/releases) are
-available for Linux, macOS, Windows, and FreeBSD.
-* **Building from source**. [This repository](https://github.com/git-lfs/git-lfs.git) can also be
-built from source using the latest version of [Go](https://golang.org), and the
-available instructions in our
-[Wiki](https://github.com/git-lfs/git-lfs/wiki/Installation#source).
+    We can set a seed for thr simulator run, this way we can be sure that all of the host and the start point of the flows were the same during each scenario run, per scenario (done in model evaluation not while we train it)
 
-### Installing
+* Simulator run results:
+    * Each good run on the simulator ends with two basic files:
+        * .params
+        * .sca file this file holds data regarding:
+            * The test that was preformed, how many hosts we had, how many flows and etc.
+            * The timestamp of the run
+            * The average statistic data for the run. Including data regarding the Utalization, Latency and fairness of the tests. This is the File that would be parsed in the plot_many_to_one.py script, and according to it the relevant plots/csv files would be created.
+            * .sca file would be created only in the end of the run
+    * Additional file that can be created during the run is a vector file. a vector files holds the data that was sampled during all of the run and not only the average data like the .sca fille does.
 
-#### From binary
+        To define which data we want to be saved in the vectors file we need to config the relevant .xml file. In our case it would be ./simulator/FW/Algorithm/rl.xml
 
-The [binary packages](https://github.com/git-lfs/git-lfs/releases) include a script which will:
+        Vector files takes a lot of memory space (~7GB per file).
 
-- Install Git LFS binaries onto the system `$PATH`
-- Run `git lfs install` to
-perform required global configuration changes.
+        To define if the run will have vectors file output or not we use the configuration set in the relevant ccsim.ini file (located in ./simulator/sim/ccsim.ini). For example to run our algo without vectors we will config the run to be Config RL_ShortSimult_ManyToOne and with vectors we will define the run to be Config  RL_ShortSimult_ManyToOne_Vectors. While runing the code from python we will config the run using the relevant configuration file located in ./config
+## requirements:
+* Baselines. To install use the following link: https://github.com/openai/baselines
+* wandb
+* Torch (to open some of the saved model you'll need torch 1.7)
+* For quantization only - Hao Pytorch_quantization package (https://gitlab-master.nvidia.com/TensorRT/Tools/pytorch-quantization)
 
-```ShellSession
-$ ./install.sh
+## How to run the python code
+The configuration of the run is set by configuring the args of the ./reinforcement_learning/run.py file
+### Train
+To train the model run the following line (notice it would train the model on 3 scenarios 2_to_1, 4_to_1, 8_to_1). all of the params bellow can be changes
+
+    ```
+    python run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>  --learning_rate 0.01 --history_length 1 --agent DETERMINISTIC --scenarios 2_to_1 4_to_1 8_to_1 --save_name <model_name> --port_increment 0 --config rtt_deterministic --agent_features action rtt_rate_signal
+    ```
+
+### Test
+To test/evaluate  the model run the following line
+
 ```
+python ./run.py --envs_per_scenario 1 --wandb <project_name>--wandb_run_name <wandb_run_name> --scenario <test_scenario> --config rtt_deterministic --agent_features action rtt_rate_signal --save_name <name_of_model_we_want_to_eval> --evaluate --port_increment <num_of_port>
 
-#### From source
-
-- Place the `git-lfs` binary on your system’s executable `$PATH` or equivalent.
-- Git LFS requires global configuration changes once per-machine. This can be done by
-running:
-
-```ShellSession
-$ git lfs install
+Example for test scenario: 8192_to_1
 ```
+<num_of_port> each port will run independently to one another, meaning defining the port_num will enable us to run in parallel on a few scenarios
+## Quantization (not used)
+The quantization is done according to the article of Hao Wu (https://arxiv.org/abs/2004.09602) and the relevant package (https://gitlab-master.nvidia.com/TensorRT/Tools/pytorch-quantization)
+The Quantization process is divided into 2 steps:
+1. Learn the scale (amax) needed for the quantization.
+    * Run the model in eval mode and enable the PyTorch quantization package to gather statistics on the model.
+        ```
+        python run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name> --learning_rate 0.01 --history_length 1 --agent DETERMINISTIC --scenarios 2_to_1 4_to_1 8_to_1 --save_name <name_of_model_we_want_to_eval> --port_increment <num_of_port> --config rtt_deterministic --agent_features action rtt_rate_signal --quantization
+        ```
+2. Quantization of the model based on the learned scales.
+    * **Run fake Quantization** : run quantization using Hao PyTorch quantization package, in this case each input/weight will be quantized (Q) and de-quantized (DQ) right after, showing the potential of the model to be quantized (cause we will loss the precision on the Q DQ process) but the calculation itself will be done using float32
 
-## Example Usage
+        ```
+         python /run.py --envs_per_scenario 1 --wandb  <project_name> --wandb_run_name <wandb_run_name>  --scenario <test_scenario> --config rtt_deterministic --agent_features action rtt_rate_signal --save_name <name_of_qunat_model_we_want_to_eval>  --evaluate --port_increment <num_of_port> --quantization
+        ```
+        Example for test scenario: 8192_to_1
+    * **Run manual quantization**: Use the learned scales (amax) and preform the quantization manually based on Hao principles. In this case the multiplication and other linear operations will be done in int8. The only process that will still run in float32 is the non linear activations (sigmoid and tanh)
 
-To begin using Git LFS within a Git repository that is not already configured
-for Git LFS, you can indicate which files you would like Git LFS to manage.
-This can be done by running the following _from within a Git repository_:
-
-```bash
-$ git lfs track "*.psd"
-```
-
-(Where `*.psd` is the pattern of filenames that you wish to track. You can read
-more about this pattern syntax
-[here](https://git-scm.com/docs/gitattributes)).
-
-> *Note:* the quotation marks surrounding the pattern are important to
-> prevent the glob pattern from being expanded by the shell.
-
-After any invocation of `git-lfs-track(1)` or `git-lfs-untrack(1)`, you _must
-commit changes to your `.gitattributes` file_. This can be done by running:
-
-```bash
-$ git add .gitattributes
-$ git commit -m "track *.psd files using Git LFS"
-```
-
-You can now interact with your Git repository as usual, and Git LFS will take
-care of managing your large files. For example, changing a file named `my.psd`
-(tracked above via `*.psd`):
-
-```bash
-$ git add my.psd
-$ git commit -m "add psd"
-```
-
-> _Tip:_ if you have large files already in your repository's history, `git lfs
-> track` will _not_ track them retroactively. To migrate existing large files
-> in your history to use Git LFS, use `git lfs migrate`. For example:
->
-> ```
-> $ git lfs migrate import --include="*.psd"
-> ```
->
-> For more information, read [`git-lfs-migrate(1)`](https://github.com/git-lfs/git-lfs/blob/master/docs/man/git-lfs-migrate.1.ronn).
-
-You can confirm that Git LFS is managing your PSD file:
-
-```bash
-$ git lfs ls-files
-3c2f7aedfb * my.psd
-```
-
-Once you've made your commits, push your files to the Git remote:
-
-```bash
-$ git push origin master
-Uploading LFS objects: 100% (1/1), 810 B, 1.2 KB/s
-# ...
-To https://github.com/git-lfs/git-lfs-test
-   67fcf6a..47b2002  master -> master
-```
-
-Note: Git LFS requires at least Git 1.8.2 on Linux or 1.8.5 on macOS.
-
-## Limitations
-
-Git LFS maintains a list of currently known limitations, which you can find and
-edit [here](https://github.com/git-lfs/git-lfs/wiki/Limitations).
-
-## Need Help?
-
-You can get help on specific commands directly:
-
-```bash
-$ git lfs help <subcommand>
-```
-
-The [official documentation](docs) has command references and specifications for
-the tool.
-
-You can always [open an issue](https://github.com/git-lfs/git-lfs/issues), and
-one of the Core Team members will respond to you. Please be sure to include:
-
-1. The output of `git lfs env`, which displays helpful information about your
-   Git repository useful in debugging.
-2. Any failed commands re-run with `GIT_TRACE=1` in the environment, which
-   displays additional information pertaining to why a command crashed.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for info on working on Git LFS and
-sending patches. Related projects are listed on the [Implementations wiki
-page](https://github.com/git-lfs/git-lfs/wiki/Implementations).
-
-## Core Team
-
-These are the humans that form the Git LFS core team, which runs the project.
-
-In alphabetical order:
-
-| [@bk2204][bk2204-user] | [@larsxschneider][larsxschneider-user] | [@PastelMobileSuit][PastelMobileSuit-user] |
-|---|---|---|
-| [![][bk2204-img]][bk2204-user] | [![][larsxschneider-img]][larsxschneider-user] | [![][PastelMobileSuit-img]][PastelMobileSuit-user] |
-
-[bk2204-img]: https://avatars1.githubusercontent.com/u/497054?s=100&v=4
-[larsxschneider-img]: https://avatars1.githubusercontent.com/u/477434?s=100&v=4
-[PastelMobileSuit-img]: https://avatars2.githubusercontent.com/u/37254014?s=100&v=4
-[bk2204-user]: https://github.com/bk2204
-[larsxschneider-user]: https://github.com/larsxschneider
-[PastelMobileSuit-user]: https://github.com/PastelMobileSuit
-
-### Alumni
-
-These are the humans that have in the past formed the Git LFS core team, or
-have otherwise contributed a significant amount to the project. Git LFS would
-not be possible without them.
-
-In alphabetical order:
-
-| [@andyneff][andyneff-user] | [@rubyist][rubyist-user] | [@sinbad][sinbad-user] | [@technoweenie][technoweenie-user] | [@ttaylorr][ttaylorr-user] |
-|---|---|---|---|---|
-| [![][andyneff-img]][andyneff-user] | [![][rubyist-img]][rubyist-user] | [![][sinbad-img]][sinbad-user] | [![][technoweenie-img]][technoweenie-user] | [![][ttaylorr-img]][ttaylorr-user] |
-
-[andyneff-img]: https://avatars1.githubusercontent.com/u/7596961?v=3&s=100
-[rubyist-img]: https://avatars1.githubusercontent.com/u/143?v=3&s=100
-[sinbad-img]: https://avatars1.githubusercontent.com/u/142735?v=3&s=100
-[technoweenie-img]: https://avatars3.githubusercontent.com/u/21?v=3&s=100
-[ttaylorr-img]: https://avatars2.githubusercontent.com/u/443245?s=100&v=4
-[andyneff-user]: https://github.com/andyneff
-[sinbad-user]: https://github.com/sinbad
-[rubyist-user]: https://github.com/rubyist
-[technoweenie-user]: https://github.com/technoweenie
-[ttaylorr-user]: https://github.com/ttaylorr
+        ```
+         python /run.py --envs_per_scenario 1 --wandb  <project_name> --wandb_run_name <wandb_run_name>  --scenario <test_scenario> --config rtt_deterministic --agent_features action rtt_rate_signal --save_name <name_of_qunat_model_we_want_to_eval>  --evaluate --port_increment <num_of_port> --m_quantization
+        ```
