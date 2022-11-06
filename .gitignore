@@ -3,3 +3,4 @@ NVIDIACCSim/sim/results/
 NVIDIACCSim.tgz
 reinforcement_learning/wandb
 *.pyc
+*pyc

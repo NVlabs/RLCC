@@ -102,12 +102,12 @@ class ADPG(BaseAgent):
         total_num_flows = sum(flows)
         rollout_counter = {}
 
-        print(f'Initiating training \n Collecting rollout for a minimum of {self.config.agent.adpg.rollout_length} steps per flow')
+        print(f'Initiating training \n Collecting rollout for {self.config.agent.adpg.rollout_length} steps per environemnt')
         while num_updates <= self.config.training.max_num_updates:
             # Perform a rollout
-            min_counter = 0
+            steps_per_env = 0
             with torch.no_grad():
-                while min_counter < self.config.agent.adpg.rollout_length:
+                while steps_per_env < self.config.agent.adpg.rollout_length:
                     hc = []
                     for info in infos:
                         if info['key'] in hc_dict:
@@ -137,7 +137,7 @@ class ADPG(BaseAgent):
                         infos[i]['reward'] = reward[i].detach().cpu().item()
 
                     timesteps += 1 
-                    min_counter = min(rollout_counter.values())
+                    steps_per_env += 1
 
                     self.log_data(timesteps, infos)
 
