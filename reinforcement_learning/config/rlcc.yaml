@@ -1,21 +1,14 @@
 env:
   scenarios:
-    - 2_to_1
-    - 4_to_1 
-    - 8_to_1 
-    - 2_to_2 
-    - 4_to_4
-    - 8_to_8
-    - 32_to_1
-    - 64_to_1
-    - 128_to_1
-    - 256_to_1
-    - 512_to_1
-    - 2_4_a2a
-    - 4_4_a2a
-    - 8_16_a2a
+    - "4_1"
+    - "4_16"
+    - "8_1"
+    - "4_16_a2a"
+    - "8_8_a2a"
+    - "8_16_a2a"
+    - "32_1"
   envs_per_scenario: 1
-  history_length: 1
+  history_length: 2
   omnet:
     simulator_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo//NVIDIACCSim/sim  # relative to reinforcement_learning dir 
     exe_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/NVIDIACCSim/bin/ccsim_release  #../bin/ccsim_release  # relative to run_path ##FIXME
@@ -47,7 +40,7 @@ agent:
     architecture:
       - 12
     use_rnn: null
-    target: 0.8
+    target: 0.064
     action_loss_coeff: 1
     beta: 1.5
     loss_scale: 10.0
@@ -55,14 +48,13 @@ agent:
     bias: False
     constraint: buffer
     loss_batch: 0 # use batch of agents in rollout instead of all agents
-    warmup_updates: 20
-    warmup_length: 1024
     max_batch_size: 8192
     max_step_size: 8192
     base_rtt: 8192.0
+
 logging:
-  wandb: False  # Logging using weights and biases
-  wandb_run_name: unnamed  # Logging using weights and biases
+  wandb: True  # Logging using weights and biases
+  wandb_run_name: test  # Logging using weights and biases
   run_id: ''
   min_log_interval: 16024 # The minimum number of iterations before each log occurs
   num_tests_to_log: 1

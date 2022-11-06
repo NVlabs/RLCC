@@ -4,7 +4,7 @@ import os
 import torch
 
 from config.args import parse_args
-from config.config import Config, str2bool
+from config.config import Config
 from config.constants import AGENTS
 from env.utils.env_utils import make_vec_env
 
@@ -14,8 +14,6 @@ except:
     wandb = None
 
 sys.path.append(os.getcwd())
-
-wandb = None 
 
 def main(config: Config) -> None:
     """

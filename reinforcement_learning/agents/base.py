@@ -30,22 +30,13 @@ class BaseAgent:
 
     def save_model(self, checkpoint, loss=None):
         save_path = f'{self.save_path}{self.config.agent.save_name}/'
-        if self.config.agent.quantization:
-            name = '_quant_' + self.config.quantization.quantization_method
-        else:
-            name = ''
+        name = ''
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-        if checkpoint >= 20000:
-            checkpoint_name = str(checkpoint)
-        elif checkpoint == 0:
-            checkpoint_name = f'quant_{self.config.quantization.quantization_method}'
-            print(f"saving to: {save_path}")
-        else:
-            checkpoint_name = 'below_200k'
+        checkpoint_name = str(checkpoint)
         if len(self.config.agent.save_name) > 0:
             name = name + '_checkpoint_' + checkpoint_name
-            if loss is not None and checkpoint_name != 'below_200k':
+            if loss is not None:
                 name += f'_{loss:.4f}'
             
         torch.save({
@@ -53,18 +44,6 @@ class BaseAgent:
             'optimizer_state_dict': self.optimizer.state_dict(),
             }, save_path + self.config.agent.agent_type + name)
         
-        with open(f"{save_path + self.config.agent.agent_type + name}_weights.txt", 'w') as filename:
-            for _, (key, value) in enumerate(self.model.state_dict().items()):
-                if 'amax' not in key:
-                    data = value.clone().cpu().numpy()
-                    data = data.reshape(np.prod(data.shape))
-                    hidden_dim = self.config.agent.adpg.architecture[0]
-                    if 'rnn' in key: 
-                        data = data.reshape(hidden_dim, np.prod(data.shape) // hidden_dim)
-                        for i in range(hidden_dim):
-                            np.savetxt(filename, data[i, np.newaxis], delimiter=',', fmt='%.16f')  
-                    else:
-                        np.savetxt(filename, data[np.newaxis], delimiter=',', fmt='%.16f')
 
     def load_model(self):
         name = ''
@@ -81,7 +60,6 @@ class BaseAgent:
         filename = [f for f in file_list if self.config.agent.agent_type + checkpoint in f and '.txt' not in f]
         checkpoint_state_dict = torch.load(f'{self.save_path}' + name + '/' + filename[0])
         self.model.load_state_dict(checkpoint_state_dict['model_state_dict'])
-        # self.optimizer.load_state_dict(checkpoint_state_dict['optimizer_state_dict'])
 
     def test(self):
         raise NotImplementedError
@@ -97,10 +75,10 @@ class BaseAgent:
 
                 for key, value in env_info.items():
                     # env_info items to ignore during logging
-                    if key not in ['flow_tag', 'host', 'qp', 'rtt_reward', 'qlength_reward', 'cwnd']:
+                    if key not in ['flow_tag', 'host', 'qp', 'rtt_reward']:
                         if int(test) < self.config.logging.num_tests_to_log and flow_limit_check:
                             if key not in ['key']:
-                                data_name = 'qp_' + key + '/' + env_info['key'] if qp_mode else 'destip_' + key + '/' + env_info['key']
+                                data_name = 'qp_' + key + '/' + env_info['key']
 
                                 if data_name not in self.logging_data:
                                     self.logging_data[data_name] = []

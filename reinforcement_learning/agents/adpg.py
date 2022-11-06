@@ -101,18 +101,13 @@ class ADPG(BaseAgent):
         flows = [env_i.nb_flows for env_i in self.env.envs]
         total_num_flows = sum(flows)
         rollout_counter = {}
-        warmup_updates = self.config.agent.adpg.warmup_updates
-        warmup_length = self.config.agent.adpg.warmup_length
 
-        print(f'Update policy after a minimum of : {self.config.agent.adpg.rollout_length} steps per flow after a warmup of: {warmup_updates} updates of {warmup_length} total steps')
+        print(f'Initiating training \n Collecting rollout for a minimum of {self.config.agent.adpg.rollout_length} steps per flow')
         while num_updates <= self.config.training.max_num_updates:
             # Perform a rollout
             min_counter = 0
-            warmup_step = 0
-
-            is_warmup = num_updates < warmup_updates
             with torch.no_grad():
-                while warmup_step < warmup_length if is_warmup else min_counter < self.config.agent.adpg.rollout_length:
+                while min_counter < self.config.agent.adpg.rollout_length:
                     hc = []
                     for info in infos:
                         if info['key'] in hc_dict:
@@ -132,7 +127,7 @@ class ADPG(BaseAgent):
                         self.rollout[info['key']]['state'].append(state[i])
                     
                     parsed_action = self._parse_action(action.detach())
-                    state, reward, done, infos = self.env.step(parsed_action)
+                    state, reward, _, infos = self.env.step(parsed_action)
                 
                     for i, info in enumerate(infos):
                         if info['key'] in self.rollout:
@@ -142,16 +137,12 @@ class ADPG(BaseAgent):
                         infos[i]['reward'] = reward[i].detach().cpu().item()
 
                     timesteps += 1 
-                    warmup_step += 1
                     min_counter = min(rollout_counter.values())
 
                     self.log_data(timesteps, infos)
-                    if warmup_step > self.config.agent.adpg.max_step_size:
-                        print(f"break steps : {warmup_step}>{self.config.agent.adpg.max_step_size}")
-                        break
 
             agent_steps = [len(self.rollout[agent_key]['reward']) for agent_key in self.rollout.keys() if len(self.rollout[agent_key]['reward']) > 0]
-            print(f"Policy Update: {num_updates}/{self.config.training.max_num_updates} after {timesteps} total timesteps and {warmup_step} simulator steps -- steps per agent min {min(agent_steps)} max {max(agent_steps)} mean: {np.mean(agent_steps)} std: {np.std(agent_steps)}")
+            print(f"Policy Update: {num_updates}/{self.config.training.max_num_updates} after {timesteps} total timesteps \n  Per agent timestep statistics: min {min(agent_steps)} max {max(agent_steps)} mean: {np.mean(agent_steps)} std: {np.std(agent_steps)}")
             loss_stats = self._calculate_loss(timesteps)
 
             if loss_stats is not None:
@@ -215,7 +206,7 @@ class ADPG(BaseAgent):
             """
             Memory efficiency -> tensors allocated within the scope will be de-allocated before we use backward()
             """
-            if gamma != 0 and gamma != 1:
+            if 0 < gamma < 1:
                    avg_reward_to_go = torch.stack([torch.stack([(r*(gamma**idx)) for idx, r in enumerate(reward[i:])], dim=0).mean() for i in range(batch_size)], dim=0).squeeze()
             else:
                 avg_reward_to_go = torch.stack([(reward[i:]).mean() for i in range(batch_size)], dim=0).squeeze()
@@ -240,7 +231,6 @@ class ADPG(BaseAgent):
         if num_agents == 0:
             return None
 
-        total_steps = np.sum([len(self.rollout[agent_key]['reward']) for agent_key in agents])
         self.optimizer.zero_grad()
 
         for agent_key in agents:
@@ -283,5 +273,5 @@ class ADPG(BaseAgent):
         
         for key in scenario_loss_agents.keys():
             scenario_loss[key] = scenario_loss[key] / num_agents  # divide scenario loss by number of agents per scenario
-        # return parts of loss for monitoring/debugging
+        # return parts of loss for monitoring
         return total_reward_loss, total_action_loss, scenario_loss, num_agents

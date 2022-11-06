@@ -90,7 +90,6 @@ class OMNeTpp(gym.Env):
             time.sleep(0.001)
 
         print(f"restarting env: {self.scenario}")
-        print(f'{self.config.env.omnet.exe_path} {self.config.env.omnet.config_path} -c {self.scenario_name} -r {str(self.test_number)}')
         subprocess.Popen([
             self.config.env.omnet.exe_path, self.config.env.omnet.config_path,
             '-c', self.scenario_name,

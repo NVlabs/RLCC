@@ -9,14 +9,14 @@ def parse_args():
 
     # General Parameters
     parser.add_argument('--agent', dest='agent_type', type=str, choices=['PPO', 'DQN', 'SUPERVISED', 'random', 'CONSTRAINED', 'ADPG', 'None'], default='ADPG')
-    parser.add_argument('--port_increment', type=int, default=6, help='Increase the default port number. Useful if a prior run has crashed and the ports are currently in use')
+    parser.add_argument('--port_increment', type=int, default=-1, help='Increase the default port number. Useful if a prior run has crashed and the ports are currently in use')
 
     # Env Parameters
-    parser.add_argument('--scenarios', type=str, default=['2_1', '4_1', '8_1'], nargs='*', help='List of scenarios to parallelize during training')
+    parser.add_argument('--scenarios', type=str, default=-1, nargs='*', help='List of scenarios to parallelize during training')
     # parser.add_argument('--scenarios', type=str, default=['2_1'], nargs='*', help='List of scenarios to parallelize during training')
     parser.add_argument('--envs_per_scenario', type=int, default=1, help='Number of instances of each scenario')
     parser.add_argument('--max_timesteps', type=int, default=-1)
-    parser.add_argument('--history_length', type=int, default=2, help='Agent state contains history of history_length-1 past observations')
+    parser.add_argument('--history_length', type=int, default=-1, help='Agent state contains history of history_length-1 past observations')
     parser.add_argument('--evaluate', action='store_true')  # FIXME
     parser.add_argument('--log_data', action='store_true')
 
@@ -50,7 +50,6 @@ def parse_args():
     parser.add_argument('--target', type=float)
     parser.add_argument('--base_rtt', type=float)
     parser.add_argument('--factor', type=float)
-    parser.add_argument('--power', default=1, type=float)
     parser.add_argument('--max_factor', type=float)
     parser.add_argument('--bias', action='store_true')
     parser.add_argument('--beta', type=float, default=1e-1)
@@ -60,8 +59,6 @@ def parse_args():
     parser.add_argument('--loss_scale', default=10, type=float)
 
     parser.add_argument('--loss_batch', type=int, default=-1)
-    parser.add_argument('--warmup_updates', type=int, default=-1)
-    parser.add_argument('--warmup_length', type=int, default=-1)
     parser.add_argument('--max_batch_size', type=int, default=-1)
     parser.add_argument('--max_step_size', type=int, default=-1)
 
@@ -79,7 +76,7 @@ def parse_args():
     parser.add_argument('--target_update_interval', type=int, default=-1)
 
     # Logging
-    parser.add_argument('--wandb', default='rl-cc', type=str)  # Logging using weights and biases
+    parser.add_argument('--wandb', default='rlcc-demo', type=str)  # Logging using weights and biases
     parser.add_argument('--run_id', default='', type=str)  # Logging using weights and biases
     parser.add_argument('--wandb_run_name', default='train_default_config', type=str)  # Logging using weights and biases
     parser.add_argument('--frequency', default=-1, type=int)
