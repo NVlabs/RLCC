@@ -1,5 +1,0 @@
-rm -rf ../out/ 
-rm -rf ../DCTrafficGen/out/
-cd ../DCTrafficGen/ ; make makefiles ; make ; make MODE=release ; cd -
-cd  ../FW/Algorithm/ ; make sim_libs ; make MODE=release sim_libs ; cd -
-cd .. ; make makefiles ; make -j20 ; make MODE=release -j20 ; cd -

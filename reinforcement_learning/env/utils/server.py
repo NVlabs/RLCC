@@ -10,7 +10,7 @@ RawFeatures = namedtuple(
     'RawFeatures',
     [
         'cnps_received', 'rtt_packet_delay', 'monitor_interval_width',
-        'nacks_received', 'bytes_sent', 'flow_tag', 'packets_sent'
+        'nacks_received', 'bytes_sent', 'flow_tag', 'packets_sent',
         'cur_rate', 'host',
     ]
 )
@@ -52,12 +52,12 @@ class Server:
             unpacked_data = struct.unpack('I' * RECV_LENGTH, data)
             features = RawFeatures(
                 rtt_packet_delay=unpacked_data[0] / BASE_RTT, # rtt latency in nanoseconds normalized by 8192 as the base_rtt ,
-                cnps_received=unpacked_data[1] , # number cnp packets received
-                nacks_received=unpacked_data[2], # number nack packets received
-                packets_sent=unpacked_data[3], # number of packets sent
-                monitor_interval_width=unpacked_data[4], # number nack packets received
-                bytes_sent=unpacked_data[5], # number of bytes sent
-                cur_rate=unpacked_data[6] * 1. / (1 << 20), # current rate between min_rate and 1 in units of fixed-point 20
+                nacks_received=unpacked_data[1], # number nack packets received
+                cnps_received=unpacked_data[2] , # number cnp packets received
+                bytes_sent=unpacked_data[3], # number of bytes sent
+                cur_rate=unpacked_data[4] * 1. / (1 << 20), # current rate between min_rate and 1 in units of fixed-point 20
+                monitor_interval_width=unpacked_data[5], # number nack packets received
+                packets_sent=unpacked_data[6], # number of packets sent
                 flow_tag=str(unpacked_data[7]), # flowtag
                 host=str(unpacked_data[8]), # flowtag
             )

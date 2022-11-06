@@ -11,14 +11,16 @@ env:
     - 128_to_1
     - 256_to_1
     - 512_to_1
+    - 2_4_a2a
+    - 4_4_a2a
+    - 8_16_a2a
   envs_per_scenario: 1
   history_length: 1
   omnet:
-    simulator_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/simulations #../simulator  # relative to reinforcement_learning dir ##FIXME changed path
-    exe_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/out/gcc-release/src/ccsim #../bin/ccsim_release  # relative to run_path ##FIXME
-    config_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/simulations/tests.ini #FIXME#ccsim.ini # relative to run_path
+    simulator_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo//NVIDIACCSim/sim  # relative to reinforcement_learning dir 
+    exe_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/NVIDIACCSim/bin/ccsim_release  #../bin/ccsim_release  # relative to run_path ##FIXME
+    config_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/NVIDIACCSim/sim/omnetpp.ini #FIXME#ccsim.ini # relative to run_path
   reward: rtt_reward
-  default_port: 5555   #5555
   port_increment: 0
   save_path: '/swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/reinforcement_learning/saved_models/'
 
@@ -26,7 +28,6 @@ training:
   max_num_updates: 250
   learning_rate: 0.01
   gradient_clip: 0.5
-  replay_size: 1000000
 
 agent:
   save_name: ''
@@ -54,7 +55,6 @@ agent:
     bias: False
     constraint: buffer
     loss_batch: 0 # use batch of agents in rollout instead of all agents
-    leaky_relu_coeff: 0.0
     warmup_updates: 20
     warmup_length: 1024
     max_batch_size: 8192

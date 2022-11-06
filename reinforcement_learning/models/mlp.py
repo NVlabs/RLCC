@@ -11,7 +11,7 @@ RNN_TO_MODEL = {'LSTM': nn.LSTMCell, 'GRU': nn.GRUCell, 'RNN': nn.RNNCell}
 
 
 class MLP(nn.Module):
-    def __init__(self, input_size: int, output_size: int,  lrelu_coeff: float, hidden_sizes: List[int], use_rnn: str=None, bias=False,
+    def __init__(self, input_size: int, output_size: int,  hidden_sizes: List[int], use_rnn: str=None, bias=False,
      device: torch.device=torch.device('cpu')):
         super(MLP, self).__init__()
         self.hidden_sizes = hidden_sizes
@@ -25,7 +25,7 @@ class MLP(nn.Module):
         previous_dim = input_size
         for dim in hidden_sizes:
             layers.append(init_(nn.Linear(previous_dim, dim, bias=bias)))
-            activation = nn.LeakyReLU(lrelu_coeff) if lrelu_coeff > 0 else nn.ReLU()
+            activation = nn.ReLU()
             layers.append(activation)
             previous_dim = dim
 

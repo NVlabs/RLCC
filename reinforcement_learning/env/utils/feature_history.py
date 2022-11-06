@@ -9,8 +9,8 @@ ProcessedFeatures = namedtuple(
     'ProcessedFeatures',
     [
         'nack_ratio', 'cnp_ratio', 'bandwidth',
-        'rtt_packet_delay', 'cur_rate', 'action',
-        'rtt_reward', 'bytes_sent', 'monitor_interval_width',
+        'rtt_inflation', 'cur_rate', 'action',
+        'rtt_reward', 'bytes_sent',
     ]
 )
 
@@ -110,7 +110,7 @@ class FeatureHistory:
             rtt_reward=calc_rtt_reward(self.config, raw_features.rtt_packet_delay, raw_features.cur_rate),
         )
 
-    def process_observation(self, host: str, flow_tag: str, ip_mode: float) -> Tuple[np.ndarray, Dict, ProcessedFeatures]:
+    def process_observation(self, host: str, flow_tag: str) -> Tuple[np.ndarray, Dict, ProcessedFeatures]:
         """
         Given a host and flow_tag combination, returns the env information.
 

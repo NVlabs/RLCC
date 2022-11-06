@@ -1,15 +1,3 @@
-
-src/
-prog_cc/
-DCTrafficGen/
-
-prog_cc_inference/
-prog_cc_inference2/
-FW/
-simulations/results/
-scripts/
-*.pyc
-*.so
-*anf
-ext_release_files/
+NVIDIACCSim/sin/results/
 .idea/
+NVIDIACCSim.tgz

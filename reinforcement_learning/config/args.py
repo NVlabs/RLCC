@@ -5,14 +5,15 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # Config
-    parser.add_argument('--config', default='rtt_adpg', help='Name of the config file to be loaded')
+    parser.add_argument('--config', default='rlcc', help='Name of the config file to be loaded')
 
     # General Parameters
     parser.add_argument('--agent', dest='agent_type', type=str, choices=['PPO', 'DQN', 'SUPERVISED', 'random', 'CONSTRAINED', 'ADPG', 'None'], default='ADPG')
-    parser.add_argument('--port_increment', type=int, default=1, help='Increase the default port number. Useful if a prior run has crashed and the ports are currently in use')
+    parser.add_argument('--port_increment', type=int, default=6, help='Increase the default port number. Useful if a prior run has crashed and the ports are currently in use')
 
     # Env Parameters
-    parser.add_argument('--scenarios', type=str, default=['2_to_1', '4_to_1', '8_to_1'], nargs='*', help='List of scenarios to parallelize during training')
+    parser.add_argument('--scenarios', type=str, default=['2_1', '4_1', '8_1'], nargs='*', help='List of scenarios to parallelize during training')
+    # parser.add_argument('--scenarios', type=str, default=['2_1'], nargs='*', help='List of scenarios to parallelize during training')
     parser.add_argument('--envs_per_scenario', type=int, default=1, help='Number of instances of each scenario')
     parser.add_argument('--max_timesteps', type=int, default=-1)
     parser.add_argument('--history_length', type=int, default=2, help='Agent state contains history of history_length-1 past observations')
@@ -23,8 +24,6 @@ def parse_args():
     parser.add_argument('--action_multiplier_inc', default=-1, type=float)
 
     # OMNeT Parameters
-    parser.add_argument('--recv_len', type=int, default=-1)  # The number of features received from the OMNeT simulator
-    parser.add_argument('--size_of_data', type=int, default=-1)  # The number of bytes for each feature
     parser.add_argument('--run_path', default='None', type=str)  # Path for the OMNeT executable
     parser.add_argument('--config_path', default='None', type=str)  # Path for the OMNeT config file
 
@@ -45,7 +44,6 @@ def parse_args():
     parser.add_argument('--actor_architecture', type=int, default=-1, nargs='*')
     parser.add_argument('--critic_architecture', type=int, default=-1, nargs='*')
     parser.add_argument('--architecture', type=int, default=-1, nargs='*')
-    parser.add_argument('--leaky_relu_coeff', type=float)
     parser.add_argument('--rollout_length', type=int, default=-1)
 
     # RL-CC (ADPG) loss function parameters

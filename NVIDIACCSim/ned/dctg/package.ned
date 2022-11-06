@@ -1,0 +1,3 @@
+package DCTrafficGen;
+
+@license(LGPL);

@@ -1,0 +1,18 @@
+
+export LD_LIBRARY_PATH=../lib:../lib/python_2.7.11/lib/
+export NEDPATH=../ned/algo:../ned/prog_cc:../ned/dctg/
+export PATH=../lib/python_2.7.11/bin:$PATH
+
+echo NVIDIACCSimSetup is ready to use!
+echo ------------------------------------
+echo To run the simulation get into sim directory and type:
+echo "../bin/ccsim_release omnetpp.ini -c <Config> -r <Run number>"
+echo Config - determine the algoritm and traffic patterns 
+echo Run number - determain the number of Hosts and Qps in the system
+echo For more details please check omnetpp.ini file and README file
+echo
+echo exmple for running RL algorithm simultaneous start many to one traffic type with 2 hosts and one QP per host 
+echo " ../bin/ccsim_release omnetpp.ini -c RL_Simult_ManyToOne -r 0"
+echo
+echo To see detailed list of all the runs of a configuration type:
+echo ../bin/ccsim_release omnetpp.ini -x RL_Simult_ManyToOne -g

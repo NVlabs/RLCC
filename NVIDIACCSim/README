@@ -1,0 +1,49 @@
+
+--------------------------------------------------
+ConnectX-6Dx CC  Simulation - ccsim
+--------------------------------------------------
+
+Ccsim simulator enables Congestion Control algorithm development.
+The simulator is built using OMNET++.
+It contains the following ingredients:
+		ccsim.ini - configuration file of the simulation parameters that can be
+			          modified by the user. (Network parameters, Traffic patterns, 
+                                  Algorithms parameters)
+		ccsim_release and ccsim_debug - executables of the simulation in 
+			                                                release and debug mode.
+		Source codes of dcqcn, timely and dc2qcn algorithms that also compile as share libraries.
+
+Two modes are supported for the Simulation:
+- Code latency: provided by the user (default mode) 
+- Accurate code latency (TBD): for timing analysis of the algorithm (To enable change 
+	simulCore parameter to true in ccsim.ini).
+
+--------------
+Installation
+--------------
+
+To install the simulator type "source NVIDIACCSimSetup" in the top folder of the
+simulation (NVIDIACCsim-<release date>)
+
+----------------------------
+Common commands
+----------------------------
+
+Run the simulation from sim directory 
+
+run command: 
+	../bin/ccsim_release omnetpp.ini -c <Config> -r <Run number>
+	
+	Config is one of the configurations that appear in omnetpp.ini file.
+	To see all the configurations type:
+			../bin/ccsim_release omnetpp.ini -a
+	
+	Run number - determines the number of Hosts and QPs in the system.
+	To see detailed list of all the runs of a configuration type:  
+		../bin/ccsim_release omnetpp.ini -x <Config> -g
+		
+		
+Example of running RL in simultaneous many to one traffic pattern with two hosts and 
+one QP per host:
+	../bin/ccsim_release omnetpp.ini -c RL_Simult_ManyToOne -r 0
+	

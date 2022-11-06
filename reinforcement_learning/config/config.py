@@ -14,7 +14,6 @@ class Config(dict):
         if d:
             self._load_from_dict(d)
         else:
-            # path = os.path.join('.', root_path, f'{name}.yaml') #FIXME
             path = os.path.join(ROOT_PATH, root_path, f'{name}.yaml') #FIXME
             self._load_config(path)
             if override is not None:

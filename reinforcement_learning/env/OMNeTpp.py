@@ -10,6 +10,7 @@ from config.constants import py_to_c_scenarios, many2one_r_to_h_and_q, all2all_r
 
 from .utils.feature_history import FeatureHistory
 from .utils.server import Server
+from .utils import DEFAULT_PORT
 
 class OMNeTpp(gym.Env):
     """
@@ -34,7 +35,14 @@ class OMNeTpp(gym.Env):
         self.scenario_name = algo_name + self.scenario_name
         print(f"Scenario: {scenario_name_used} -> {self.scenario_name} -r {test_number} ")
 
-        self.port = self.config.env.default_port + simulation_number + self.config.env.port_increment
+        self.port = DEFAULT_PORT + simulation_number + self.config.env.port_increment
+
+        if 'ManyToOne' in self.scenario_name:
+            H, Q = many2one_r_to_h_and_q[test_number].values()
+        else: # alltoall
+            H, Q = all2all_r_to_h_and_q[test_number].values()
+        self.nb_flows = H * Q
+
 
         self.test_number = test_number + (simulation_number + self.config.env.port_increment) * config_num_tests 
         self.env_running = False
@@ -59,13 +67,11 @@ class OMNeTpp(gym.Env):
         """
         In order to run OMNeT we need to ensure that several environment variables are set.
         """
-        if 'simulations' not in os.getcwd(): # TODO go over with Yuval and see how to change paths here
+        if 'NVIDIACCSim/sim' not in os.getcwd():
             os.chdir(self.config.env.omnet.simulator_path)
-            os.environ['LD_LIBRARY_PATH'] = '/lib64/:$LD_LIBRARY_PATH:/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.102-4.b14.el7.x86_64/jre/lib/amd64/jli/'
-            os.environ['NEDPATH'] = '../src:../FW/Algorithm:../DCTrafficGen/src'
-            os.environ['PATH'] = '/usr/cad/omnet/release/bin:/usr/cad/omnet/tcltk/usr/bin:/usr/cad/omnet/jre/bin:/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:' + os.environ['PATH']
-
-            # os.chdir('simulations')
+            os.environ['LD_LIBRARY_PATH'] = '../lib:../lib/python_2.7.11/lib/'
+            os.environ['NEDPATH'] = '../ned/algo/:../ned/prog_cc:../ned/dctg/'
+            os.environ['PATH'] = '../lib/python_2.7.11/bin:' + os.environ['PATH']
 
     def seed(self, seed: int = None) -> None:
         """
@@ -89,8 +95,8 @@ class OMNeTpp(gym.Env):
             self.config.env.omnet.exe_path, self.config.env.omnet.config_path,
             '-c', self.scenario_name,
             '-r', str(self.test_number), '-u' ,'Cmdenv',
-            #  ], close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-             ])
+             ], close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            #  ])
         #    
         
         self.env_running = True
@@ -107,7 +113,7 @@ class OMNeTpp(gym.Env):
         self.previous_host_flow_tag = (raw_features.host, raw_features.flow_tag)
         self.previous_cur_rate = raw_features.cur_rate
 
-        return self.feature_history.process_observation(raw_features.host, raw_features.flow_tag, self.ip_mode)[0],\
+        return self.feature_history.process_observation(raw_features.host, raw_features.flow_tag)[0],\
                dict(key=key, reward=0, num_flows=self.nb_flows, env_num=self.env_number, host=raw_features.host, qp=raw_features.flow_tag)
 
     def step(self, action: float) -> Tuple[np.ndarray, float, bool, Dict]:
@@ -131,7 +137,7 @@ class OMNeTpp(gym.Env):
             return self.reset()
         self.feature_history.update_history(raw_features)
       
-        state, info, processed_features = self.feature_history.process_observation(raw_features.host, raw_features.flow_tag, self.ip_mode)
+        state, info, processed_features = self.feature_history.process_observation(raw_features.host, raw_features.flow_tag)
 
         # Calculate the reward.
         reward = self._calculate_reward(action, info)

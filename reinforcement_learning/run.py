@@ -15,6 +15,7 @@ except:
 
 sys.path.append(os.getcwd())
 
+wandb = None 
 
 def main(config: Config) -> None:
     """

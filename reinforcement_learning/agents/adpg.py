@@ -37,7 +37,6 @@ class ADPG(BaseAgent):
             hidden_sizes=self.config.agent.adpg.architecture,
             use_rnn=self.config.agent.adpg.use_rnn,
             bias=self.config.agent.adpg.bias,
-            lrelu_coeff=self.config.agent.adpg.leaky_relu_coeff,
             device=self.config.device,
         ).to(self.config.device)
 
@@ -272,10 +271,6 @@ class ADPG(BaseAgent):
             agent_reward_loss, agent_action_loss = get_loss(actions, rewards, batch_size, scenario, self.config.agent.adpg.loss_scale, action_loss_coeff, scenario_loss, self.config.agent.discount)
             agent_reward_loss = agent_reward_loss / num_agents
             agent_action_loss = agent_action_loss / num_agents
-            if self.config.agent.adpg.balance_loss:
-                ideal_timesteps = total_steps / agent_rollout['num_flows']
-                agent_reward_loss = agent_reward_loss * (ideal_timesteps / batch_size)
-                agent_action_loss = agent_action_loss * (ideal_timesteps / batch_size)
 
             (agent_reward_loss + agent_action_loss).backward()
 
