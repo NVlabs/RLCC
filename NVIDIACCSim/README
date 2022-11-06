@@ -6,17 +6,11 @@ ConnectX-6Dx CC  Simulation - ccsim
 Ccsim simulator enables Congestion Control algorithm development.
 The simulator is built using OMNET++.
 It contains the following ingredients:
-		ccsim.ini - configuration file of the simulation parameters that can be
+		omnetpp.ini - configuration file of the simulation parameters that can be
 			          modified by the user. (Network parameters, Traffic patterns, 
                                   Algorithms parameters)
-		ccsim_release and ccsim_debug - executables of the simulation in 
+		ccsim_release - executables of the simulation in 
 			                                                release and debug mode.
-		Source codes of dcqcn, timely and dc2qcn algorithms that also compile as share libraries.
-
-Two modes are supported for the Simulation:
-- Code latency: provided by the user (default mode) 
-- Accurate code latency (TBD): for timing analysis of the algorithm (To enable change 
-	simulCore parameter to true in ccsim.ini).
 
 --------------
 Installation
