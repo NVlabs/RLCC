@@ -55,7 +55,6 @@ class FeatureHistory:
         self.number_of_features = len(self.config.agent.agent_features) 
         self.state_history_dict = {}
         self.action_history_dict = {}
-        self.prev_action_history_dict = {}
         self.simulation_number = simulation_number # for debugging
 
     def reset(self) -> None:
@@ -74,10 +73,6 @@ class FeatureHistory:
 
     def update_action(self, host: str, flow_tag: str, action: float):
         key = host + ' ' + flow_tag
-        if key in self.prev_action_history_dict:
-            self.prev_action_history_dict[key] = self.action_history_dict[key]
-        else:
-            self.prev_action_history_dict[key] = action
         self.action_history_dict[key] = action
 
     def _get_action(self, host: str, flow_tag: str):
@@ -87,8 +82,10 @@ class FeatureHistory:
         :param flow_tag: flow_tag ID
         :return: The previous action the agent controlling this flow took.
         """
+        
         key = host + ' ' + flow_tag
         if key not in self.action_history_dict:
+            print(f'current key: {key} keys in dict: {list(self.action_history_dict.keys())}')
             return 1
         return self.action_history_dict[key]
 

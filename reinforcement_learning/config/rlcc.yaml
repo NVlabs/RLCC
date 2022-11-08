@@ -3,10 +3,10 @@ env:
     - "4_1"
     - "4_16"
     - "8_1"
-    - "4_16_a2a"
-    - "8_8_a2a"
-    - "8_16_a2a"
-    - "32_1"
+    # - "4_16_a2a"
+    # - "8_8_a2a"
+    # - "8_16_a2a"
+    #- "32_1"
   envs_per_scenario: 1
   history_length: 2
   omnet:
@@ -14,11 +14,11 @@ env:
     exe_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/NVIDIACCSim/bin/ccsim_release  #../bin/ccsim_release  # relative to run_path ##FIXME
     config_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/NVIDIACCSim/sim/omnetpp.ini #FIXME#ccsim.ini # relative to run_path
   reward: rtt_reward
-  port_increment: 0
+  port_increment: 10
   save_path: '/swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/reinforcement_learning/saved_models/'
 
 training:
-  max_num_updates: 250
+  max_num_updates: 1000
   learning_rate: 0.01
   gradient_clip: 0.5
 
@@ -36,15 +36,16 @@ agent:
   adpg:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2
-    rollout_length: 1024
+    rollout_length: 2048
     architecture:
+      - 12
       - 12
     use_rnn: null
     target: 0.064
     action_loss_coeff: 1
     beta: 1.5
-    loss_scale: 10.0
-    scale: 10.0
+    loss_scale: 1.0
+    scale: 12.5
     bias: False
     constraint: buffer
     loss_batch: 0 # use batch of agents in rollout instead of all agents
@@ -53,11 +54,11 @@ agent:
     base_rtt: 8192.0
 
 logging:
-  wandb: True  # Logging using weights and biases
+  wandb: false  # Logging using weights and biases
   wandb_run_name: test  # Logging using weights and biases
   run_id: ''
-  min_log_interval: 16024 # The minimum number of iterations before each log occurs
+  min_log_interval: 1024 # The minimum number of iterations before each log occurs
   num_tests_to_log: 1
   limit_flows: False
-  limit_hosts: 2
+  limit_hosts: 3
   limit_qps: 3

@@ -42,6 +42,7 @@ if __name__ == '__main__':
     else:
         config = Config(override=args.__dict__)
         config.logging.run_id = False
+
     config.agent.save_name = config.logging.wandb_run_name
     if config.logging.wandb and wandb:
         wandb.init(project=args.wandb, name=args.wandb_run_name, resume=config.logging.run_id, config=args)

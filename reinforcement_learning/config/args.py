@@ -49,11 +49,10 @@ def parse_args():
     # RL-CC (ADPG) loss function parameters
     parser.add_argument('--target', type=float)
     parser.add_argument('--base_rtt', type=float)
-    parser.add_argument('--factor', type=float)
-    parser.add_argument('--max_factor', type=float)
     parser.add_argument('--bias', action='store_true')
-    parser.add_argument('--beta', type=float, default=1e-1)
-    parser.add_argument('--max_num_updates', default=80, type=int)
+    parser.add_argument('--beta', type=float, default=-1)
+    parser.add_argument('--scale', type=float, default=-1)
+    parser.add_argument('--max_num_updates', default=-1, type=int)
 
     parser.add_argument('--action_loss_coeff', default=1, type=float)
     parser.add_argument('--loss_scale', default=10, type=float)
@@ -76,7 +75,7 @@ def parse_args():
     parser.add_argument('--target_update_interval', type=int, default=-1)
 
     # Logging
-    parser.add_argument('--wandb', default='rlcc-demo', type=str)  # Logging using weights and biases
+    parser.add_argument('--wandb', default=-1, type=str)  # Logging using weights and biases
     parser.add_argument('--run_id', default='', type=str)  # Logging using weights and biases
     parser.add_argument('--wandb_run_name', default='train_default_config', type=str)  # Logging using weights and biases
     parser.add_argument('--frequency', default=-1, type=int)
@@ -86,4 +85,5 @@ def parse_args():
     parser.add_argument('--limit_qps', type=int)  # max qp id per host to log
 
     args = parser.parse_args()
+
     return args

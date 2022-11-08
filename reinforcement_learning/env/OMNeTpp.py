@@ -6,8 +6,7 @@ from typing import Dict, Tuple
 import gym
 import numpy as np
 from config.config import Config
-from config.constants import py_to_c_scenarios, many2one_r_to_h_and_q, all2all_r_to_h_and_q
-
+from config.constants import py_to_c_scenarios
 from .utils.feature_history import FeatureHistory
 from .utils.server import Server
 from .utils import DEFAULT_PORT
@@ -36,13 +35,6 @@ class OMNeTpp(gym.Env):
         print(f"Scenario: {scenario_name_used} -> {self.scenario_name} -r {test_number} ")
 
         self.port = DEFAULT_PORT + simulation_number + self.config.env.port_increment
-
-        if 'ManyToOne' in self.scenario_name:
-            H, Q = many2one_r_to_h_and_q[test_number].values()
-        else: # alltoall
-            H, Q = all2all_r_to_h_and_q[test_number].values()
-        self.nb_flows = H * Q
-
 
         self.test_number = test_number + (simulation_number + self.config.env.port_increment) * config_num_tests 
         self.env_running = False
@@ -101,19 +93,18 @@ class OMNeTpp(gym.Env):
         self.env_running = True
 
         self.feature_history.reset()
-        # self.last_bw_request = {}
+        self.last_bw_request = {}
 
         raw_features = self.server.reset()
         self.feature_history.update_history(raw_features)
 
         key = self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag
 
-
         self.previous_host_flow_tag = (raw_features.host, raw_features.flow_tag)
         self.previous_cur_rate = raw_features.cur_rate
 
         return self.feature_history.process_observation(raw_features.host, raw_features.flow_tag)[0],\
-               dict(key=key, reward=0, num_flows=self.nb_flows, env_num=self.env_number, host=raw_features.host, qp=raw_features.flow_tag)
+               dict(key=key, reward=0, env_num=self.env_number, host=raw_features.host, qp=raw_features.flow_tag)
 
     def step(self, action: float) -> Tuple[np.ndarray, float, bool, Dict]:
         """
@@ -127,16 +118,17 @@ class OMNeTpp(gym.Env):
         if self.previous_host_flow_tag[0] not in self.last_bw_request:
             self.last_bw_request[self.previous_host_flow_tag[0]] = {}
         self.last_bw_request[self.previous_host_flow_tag[0]][self.previous_host_flow_tag[1]] = min(self.previous_cur_rate * action, 1.)
+        
         self.feature_history.update_action(self.previous_host_flow_tag[0], self.previous_host_flow_tag[1], action)
 
         # Perform a step in the simulator and process the received raw features.
         raw_features = self.server.step(action)
+        print(f"updating action {action} for: {self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag}")
         if raw_features is None:
-            # print('reseting env')
             return self.reset()
         self.feature_history.update_history(raw_features)
       
-        state, info, processed_features = self.feature_history.process_observation(raw_features.host, raw_features.flow_tag)
+        state, info, _ = self.feature_history.process_observation(raw_features.host, raw_features.flow_tag)
 
         # Calculate the reward.
         reward = self._calculate_reward(action, info)
@@ -148,8 +140,7 @@ class OMNeTpp(gym.Env):
         # Update the information dict.
         key = self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag
 
-        info.update(dict(key=key, reward=reward, num_flows=self.nb_flows, host=raw_features.host, qp=raw_features.flow_tag, env_num=self.env_number))
-        # print(f"state: {state} scenario: {self.scenario_name}")
+        info.update(dict(key=key, reward=reward, host=raw_features.host, qp=raw_features.flow_tag, env_num=self.env_number))
         return state, reward, False, info
 
     def _calculate_reward(self, action: float, info: Dict) -> float:

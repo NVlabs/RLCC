@@ -98,8 +98,6 @@ class ADPG(BaseAgent):
         num_updates = 1
         self.rollout = {}
         
-        flows = [env_i.nb_flows for env_i in self.env.envs]
-        total_num_flows = sum(flows)
         rollout_counter = {}
 
         print(f'Initiating training \n Collecting rollout for {self.config.agent.adpg.rollout_length} steps per environemnt')
@@ -122,7 +120,7 @@ class ADPG(BaseAgent):
                         hc_dict[info['key']] = (hc[0][i], hc[1][i])
                     for i, info in enumerate(infos):
                         if info['key'] not in self.rollout:
-                            self.rollout[info['key']] = dict(state=[], action=[], reward=[], num_flows=info['num_flows'])
+                            self.rollout[info['key']] = dict(state=[], action=[], reward=[])
                             rollout_counter[info['key']] = 0
                         self.rollout[info['key']]['state'].append(state[i])
                     
@@ -147,7 +145,7 @@ class ADPG(BaseAgent):
 
             if loss_stats is not None:
                 reward_loss, action_loss, scenario_loss, num_agents = loss_stats
-                print(f"Updated based on: {num_agents} / {total_num_flows} agents")
+                print(f"Updated based on: {num_agents}")
 
                 self.rollout = {}
                 if self.config.logging.wandb is not None:

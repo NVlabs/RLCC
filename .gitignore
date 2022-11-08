@@ -1,6 +1,7 @@
+*.pyc
 NVIDIACCSim/sim/results/
 .idea/
 NVIDIACCSim.tgz
 reinforcement_learning/wandb
-*.pyc
-*pyc
+wandb/
+reinforcement_learning/saved_models
