@@ -10,12 +10,12 @@ env:
   envs_per_scenario: 1
   history_length: 2
   omnet:
-    simulator_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo//NVIDIACCSim/sim  # relative to reinforcement_learning dir 
-    exe_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/NVIDIACCSim/bin/ccsim_release  #../bin/ccsim_release  # relative to run_path ##FIXME
-    config_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/NVIDIACCSim/sim/omnetpp.ini #FIXME#ccsim.ini # relative to run_path
+    simulator_path: ../NVIDIACCSim/sim  # relative to reinforcement_learning dir 
+    exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path ##FIXME
+    config_path: omnetpp.ini #FIXME#ccsim.ini # relative to run_path
   reward: rtt_reward
   port_increment: 10
-  save_path: '/swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/reinforcement_learning/saved_models/'
+  save_path: '.'
 
 training:
   max_num_updates: 1000

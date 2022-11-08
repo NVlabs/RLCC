@@ -1,11 +1,8 @@
 import argparse
 import os
-import sys
 
 import yaml
 
-ROOT_PATH = r'/swgwork/bfuhrer/projects/rlcc/new_simulator/rl-cc-demo/reinforcement_learning/'
-sys.path.append(ROOT_PATH)
 
 class Config(dict):
     def __init__(self, name='default', root_path='config', override=None, d=None):
@@ -14,7 +11,7 @@ class Config(dict):
         if d:
             self._load_from_dict(d)
         else:
-            path = os.path.join(ROOT_PATH, root_path, f'{name}.yaml') #FIXME
+            path = os.path.join(root_path, f'{name}.yaml')
             self._load_config(path)
             if override is not None:
                 Config._override_config(self, override)
