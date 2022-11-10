@@ -53,7 +53,7 @@ class AsyncronousRollouts:
         :param env_info: A dictionary containing the info returned from the environment for the current key.
         :return: The key of the (env, host, qp) combination.
         """
-        instance_key = env_info['key']
+        instance_key = env_info['agent_key']
         if instance_key not in self.rollout:
             self.rollout[instance_key] = dict()
 

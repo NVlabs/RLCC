@@ -41,8 +41,8 @@ class Supervised(BaseAgent):
             if self.config.logging.wandb is not None:
                 for env_info in info:
                     for key, value in env_info.items():
-                        if key not in ['key']:
-                            self.config.logging.wandb.log({env_info['key'] + '/' + key: value}, step=timesteps)
+                        if key not in ['agent_key']:
+                            self.config.logging.wandb.log({env_info['agent_key'] + '/' + key: value}, step=timesteps)
 
             timesteps += state.shape[0]
 

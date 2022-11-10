@@ -75,8 +75,8 @@ class ADPG(BaseAgent):
             while True:
                 hc = []
                 for info in infos:
-                    if info['key'] in hc_dict:
-                        hc.append(hc_dict[info['key']])
+                    if info['agent_key'] in hc_dict:
+                        hc.append(hc_dict[info['agent_key']])
                     else:
                         hc.append(self._init_hidden())
 
@@ -86,7 +86,7 @@ class ADPG(BaseAgent):
                 action, hc = self._policy(state, hc)
 
                 for i, info in enumerate(infos):
-                    hc_dict[info['key']] = (hc[0][i], hc[1][i])
+                    hc_dict[info['agent_key']] = (hc[0][i], hc[1][i])
 
                 state, _, done, infos = self.env.step(self._parse_action(action))
 
@@ -112,8 +112,8 @@ class ADPG(BaseAgent):
                 while steps_per_env < self.config.agent.adpg.rollout_length:
                     hc = []
                     for info in infos:
-                        if info['key'] in hc_dict:
-                            hc.append(hc_dict[info['key']])
+                        if info['agent_key'] in hc_dict:
+                            hc.append(hc_dict[info['agent_key']])
                         else:
                             hc.append(self._init_hidden())
                     h, c = zip(*hc)
@@ -121,20 +121,20 @@ class ADPG(BaseAgent):
                     action, hc = self._policy(state, hc)
 
                     for i, info in enumerate(infos):
-                        hc_dict[info['key']] = (hc[0][i], hc[1][i])
+                        hc_dict[info['agent_key']] = (hc[0][i], hc[1][i])
                     for i, info in enumerate(infos):
-                        if info['key'] not in self.rollout:
-                            self.rollout[info['key']] = dict(state=[], action=[], reward=[])
-                            rollout_counter[info['key']] = 0
-                        self.rollout[info['key']]['state'].append(state[i])
+                        if info['agent_key'] not in self.rollout:
+                            self.rollout[info['agent_key']] = dict(state=[], action=[], reward=[])
+                            rollout_counter[info['agent_key']] = 0
+                        self.rollout[info['agent_key']]['state'].append(state[i])
                     
                     parsed_action = self._parse_action(action.detach())
                     state, reward, _, infos = self.env.step(parsed_action)
                 
                     for i, info in enumerate(infos):
-                        if info['key'] in self.rollout:
-                            self.rollout[info['key']]['reward'].append(reward[i].detach().cpu().item())
-                            rollout_counter[info['key']] += 1
+                        if info['agent_key'] in self.rollout:
+                            self.rollout[info['agent_key']]['reward'].append(reward[i].detach().cpu().item())
+                            rollout_counter[info['agent_key']] += 1
                         infos[i]['reward'] = reward[i].detach().cpu().item()
 
                     timesteps += 1 

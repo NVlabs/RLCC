@@ -58,21 +58,19 @@ class FeatureHistory:
         self.state_history_dict = {}
 
     def update_history(self, raw_features: RawFeatures) -> None:
-        key = raw_features.host + ' ' + raw_features.flow_tag
-        if key not in self.state_history_dict:
-            self.state_history_dict[key] = deque(maxlen=self.config.env.history_length)
+        agent_key = raw_features.host + ' ' + raw_features.flow_tag
+        if agent_key not in self.state_history_dict:
+            self.state_history_dict[agent_key] = deque(maxlen=self.config.env.history_length)
             self.update_action(raw_features.host, raw_features.flow_tag, 1.)
 
         features = self._process_features(raw_features)
-        self.state_history_dict[key].append(features)
-        while len(self.state_history_dict[key]) < self.config.env.history_length:
-            self.state_history_dict[key].append(features)
+        self.state_history_dict[agent_key].append(features)
+        while len(self.state_history_dict[agent_key]) < self.config.env.history_length:
+            self.state_history_dict[agent_key].append(features)
 
     def update_action(self, host: str, flow_tag: str, action: float):
-        key = host + ' ' + flow_tag
-        self.action_history_dict[key] = action
-        # if key in self.action_history_dict.keys():
-        #     print(f'key {key} is in')
+        agent_key = host + ' ' + flow_tag
+        self.action_history_dict[agent_key] = action
 
     def _get_action(self, host: str, flow_tag: str):
         """
@@ -82,11 +80,10 @@ class FeatureHistory:
             :return: The previous action the agent controlling this flow took.
         """
         
-        key = host + ' ' + flow_tag
-        if key not in self.action_history_dict:
-            #print(f'current key: {key} keys in dict: {list(self.action_history_dict.keys())}')
+        agent_key = host + ' ' + flow_tag
+        if agent_key not in self.action_history_dict:
             return 1
-        return self.action_history_dict[key]
+        return self.action_history_dict[agent_key]
 
     def _process_features(self, raw_features: RawFeatures) -> ProcessedFeatures:
         """
@@ -117,22 +114,22 @@ class FeatureHistory:
             :return: The features provided to the agent, important information that can be logged and the last processed
                 features.
         """
-        key = host + ' ' + flow_tag
+        agent_key = host + ' ' + flow_tag
 
         features = []
-        for idx in range(len(self.state_history_dict[key])):
+        for idx in range(len(self.state_history_dict[agent_key])):
             for required_feature in self.config.agent.agent_features:
-                feature = getattr(self.state_history_dict[key][idx], required_feature)
+                feature = getattr(self.state_history_dict[agent_key][idx], required_feature)
                 features.append(feature)
 
         logging_information = dict(
-            nack_ratio=self.state_history_dict[key][-1].nack_ratio,
-            cnp_ratio=self.state_history_dict[key][-1].cnp_ratio,
-            rate=self.state_history_dict[key][-1].cur_rate,
-            rtt_reward=self.state_history_dict[key][-1].rtt_reward,
-            rtt_inflation=self.state_history_dict[key][-1].rtt_inflation,
-            bandwidth=self.state_history_dict[key][-1].bandwidth,
-            action=self.state_history_dict[key][-1].action,
+            nack_ratio=self.state_history_dict[agent_key][-1].nack_ratio,
+            cnp_ratio=self.state_history_dict[agent_key][-1].cnp_ratio,
+            rate=self.state_history_dict[agent_key][-1].cur_rate,
+            rtt_reward=self.state_history_dict[agent_key][-1].rtt_reward,
+            rtt_inflation=self.state_history_dict[agent_key][-1].rtt_inflation,
+            bandwidth=self.state_history_dict[agent_key][-1].bandwidth,
+            action=self.state_history_dict[agent_key][-1].action,
         )
 
-        return np.array(features).flatten(), logging_information, self.state_history_dict[key][-1]
+        return np.array(features).flatten(), logging_information, self.state_history_dict[agent_key][-1]

@@ -42,7 +42,7 @@ class DummyEnv(gym.Env):
         return self.observation_space.sample()
 
     def reset(self):
-        return np.zeros_like(self.sample_random_features()), dict(key=self.scenario + ' ' + self.host + ' ' + self.qp)
+        return np.zeros_like(self.sample_random_features()), dict(agent_key=self.scenario + ' ' + self.host + ' ' + self.qp)
 
     def step(self, action: float):
         state = np.zeros_like(self.sample_random_features())
@@ -50,7 +50,7 @@ class DummyEnv(gym.Env):
             reward = .1
         else:
             reward = -.1
-        return state, reward, False, dict(key=self.scenario + ' ' + self.host + ' ' + self.qp)
+        return state, reward, False, dict(agent_key=self.scenario + ' ' + self.host + ' ' + self.qp)
 
     def render(self, mode: str = 'human') -> None:
         pass

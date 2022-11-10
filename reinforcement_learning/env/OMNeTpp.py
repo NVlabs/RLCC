@@ -101,13 +101,13 @@ class OMNeTpp(gym.Env):
         raw_features = self.server.reset()
         self.feature_history.update_history(raw_features)
 
-        key = self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag
+        agent_key = self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag
 
         self.previous_host_flow_tag = (raw_features.host, raw_features.flow_tag)
         self.previous_cur_rate = raw_features.cur_rate
 
         return self.feature_history.process_observation(raw_features.host, raw_features.flow_tag)[0],\
-               dict(key=key, reward=0, env_num=self.env_number, host=raw_features.host, qp=raw_features.flow_tag)
+               dict(agent_key=agent_key, reward=0, env_num=self.env_number, host=raw_features.host, qp=raw_features.flow_tag)
 
     def step(self, action: float) -> Tuple[np.ndarray, float, bool, Dict]:
         """
@@ -146,9 +146,9 @@ class OMNeTpp(gym.Env):
         self.previous_cur_rate = raw_features.cur_rate
 
         # Update the information dict.
-        key = self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag
+        agent_key = self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag
 
-        info.update(dict(key=key, reward=reward, host=raw_features.host, qp=raw_features.flow_tag, env_num=self.env_number))
+        info.update(dict(agent_key=agent_key, reward=reward, host=raw_features.host, qp=raw_features.flow_tag, env_num=self.env_number))
         return state, reward, False, info
 
     def _calculate_reward(self, action: float, info: Dict) -> float:

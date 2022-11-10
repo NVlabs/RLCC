@@ -66,7 +66,7 @@ class BaseAgent:
     def log_data(self, timesteps, infos):
         if self.config.logging.wandb is not None:
             for env_info in infos:
-                test, host, qp = env_info['key'].split('_')[-1].split('/')
+                test, host, qp = env_info['agent_key'].split('_')[-1].split('/')
                 flow_limit_check = True
                 if self.config.logging.limit_flows is not None:
                     flow_limit_check = (int(host) < self.config.logging.limit_hosts and int(qp) < self.config.logging.limit_qps)
@@ -75,8 +75,8 @@ class BaseAgent:
                     # env_info items to ignore during logging
                     if key not in ['flow_tag', 'host', 'qp', 'rtt_reward']:
                         if int(test) < self.config.logging.num_tests_to_log and flow_limit_check:
-                            if key not in ['key']:
-                                data_name = key + '/' + env_info['key']
+                            if key not in ['agent_key']:
+                                data_name = key + '/' + env_info['agent_key']
 
                                 if data_name not in self.logging_data:
                                     self.logging_data[data_name] = []
