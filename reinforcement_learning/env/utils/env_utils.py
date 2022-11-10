@@ -1,10 +1,8 @@
 import torch
 import numpy as np
-from multiprocessing import Process, Pipe
 import gym
 from baselines.common.vec_env import VecEnvWrapper
 from baselines.common.vec_env import VecEnv, CloudpickleWrapper
-from baselines.common.vec_env.subproc_vec_env import worker
 from env import OMNeTpp
 from config.config import Config
 
@@ -24,11 +22,7 @@ def make_vec_env(config: Config) -> VecEnv:
             envs.append(make_env(scenario, i, j, config))
             i += 1
 
-    if True:  
-        envs = DummyVecEnvWithResetInfo(envs)
-    else:
-        envs = SubprocVecEnvWithResetInfo(envs)
-
+    envs = DummyVecEnvWithResetInfo(envs)
     envs = VecPyTorch(envs, device=config.device)
 
     return envs
@@ -112,60 +106,3 @@ class DummyVecEnvWithResetInfo(VecEnv):
     def close(self):
         for i in range(self.num_envs):
             self.envs[i].close()
-
-
-class SubprocVecEnvWithResetInfo(VecEnv):
-    """
-    Tweaked the original VecEnv to support async envs that return information on reset.
-    """
-    def __init__(self, env_fns, spaces=None):
-        self.waiting = False
-        self.closed = False
-        nenvs = len(env_fns)
-        self.remotes, self.work_remotes = zip(*[Pipe() for _ in range(nenvs)])
-        self.ps = [Process(target=worker, args=(work_remote, remote, CloudpickleWrapper(env_fn)))
-                   for (work_remote, remote, env_fn) in zip(self.work_remotes, self.remotes, env_fns)]
-        for p in self.ps:
-            p.daemon = True  # if the main process crashes, we should not cause things to hang
-            p.start()
-        for remote in self.work_remotes:
-            remote.close()
-
-        self.remotes[0].send(('get_spaces', None))
-        observation_space, action_space = self.remotes[0].recv()
-        VecEnv.__init__(self, len(env_fns), observation_space, action_space)
-
-    def step_async(self, actions):
-        for remote, action in zip(self.remotes, actions):
-            remote.send(('step', action))
-        self.waiting = True
-
-    def step_wait(self):
-        results = [remote.recv() for remote in self.remotes]
-        self.waiting = False
-        obs, rews, dones, infos = zip(*results)
-        return np.stack(obs), np.stack(rews), np.stack(dones), infos
-
-    def reset(self):
-        for remote in self.remotes:
-            remote.send(('reset', None))
-        results = [remote.recv() for remote in self.remotes]
-        obs, infos = zip(*results)
-        return np.stack(obs), infos
-
-    def reset_task(self):
-        for remote in self.remotes:
-            remote.send(('reset_task', None))
-        return np.stack([remote.recv() for remote in self.remotes])
-
-    def close(self):
-        if self.closed:
-            return
-        if self.waiting:
-            for remote in self.remotes:
-                remote.recv()
-        for remote in self.remotes:
-            remote.send(('close', None))
-        for p in self.ps:
-            p.join()
-        self.closed = True
