@@ -20,8 +20,6 @@ def make_vec_env(config: Config) -> VecEnv:
     i = 0
     for scenario in config.env.scenarios:
         num_envs = config.env.envs_per_scenario
-        # if '_ip' in scenario and num_envs == 1:
-        #         num_envs = 2
         for j in range(num_envs):
             envs.append(make_env(scenario, i, j, config))
             i += 1

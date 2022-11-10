@@ -131,7 +131,6 @@ class ADPG(BaseAgent):
                         if info['key'] in self.rollout:
                             self.rollout[info['key']]['reward'].append(reward[i].detach().cpu().item())
                             rollout_counter[info['key']] += 1
-                        infos[i]['unparsed_action'] = action[i].detach().cpu().item()
                         infos[i]['reward'] = reward[i].detach().cpu().item()
 
                     timesteps += 1 

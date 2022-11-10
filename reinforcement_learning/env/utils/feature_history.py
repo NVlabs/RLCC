@@ -74,6 +74,8 @@ class FeatureHistory:
     def update_action(self, host: str, flow_tag: str, action: float):
         key = host + ' ' + flow_tag
         self.action_history_dict[key] = action
+        # if key in self.action_history_dict.keys():
+        #     print(f'key {key} is in')
 
     def _get_action(self, host: str, flow_tag: str):
         """
@@ -85,7 +87,7 @@ class FeatureHistory:
         
         key = host + ' ' + flow_tag
         if key not in self.action_history_dict:
-            print(f'current key: {key} keys in dict: {list(self.action_history_dict.keys())}')
+            #print(f'current key: {key} keys in dict: {list(self.action_history_dict.keys())}')
             return 1
         return self.action_history_dict[key]
 

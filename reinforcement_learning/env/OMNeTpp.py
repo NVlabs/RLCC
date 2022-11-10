@@ -123,7 +123,7 @@ class OMNeTpp(gym.Env):
 
         # Perform a step in the simulator and process the received raw features.
         raw_features = self.server.step(action)
-        print(f"updating action {action} for: {self.scenario + '_' + str(self.env_number) + '/' + raw_features.host + '/' + raw_features.flow_tag}")
+        #print(f"updating action {action} for: {self.scenario + '_' + str(self.env_number) + '/' + self.previous_host_flow_tag[0] + '/' + self.previous_host_flow_tag[1]}")
         if raw_features is None:
             return self.reset()
         self.feature_history.update_history(raw_features)

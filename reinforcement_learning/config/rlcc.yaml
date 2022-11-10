@@ -3,10 +3,10 @@ env:
     - "4_1"
     - "4_16"
     - "8_1"
-    # - "4_16_a2a"
-    # - "8_8_a2a"
-    # - "8_16_a2a"
-    #- "32_1"
+    - "4_16_a2a"
+    - "8_8_a2a"
+    - "8_16_a2a"
+    - "32_1"
   envs_per_scenario: 1
   history_length: 2
   omnet:
@@ -36,16 +36,15 @@ agent:
   adpg:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2
-    rollout_length: 2048
+    rollout_length: 1024
     architecture:
-      - 12
       - 12
     use_rnn: null
     target: 0.064
     action_loss_coeff: 1
     beta: 1.5
-    loss_scale: 1.0
-    scale: 12.5
+    loss_scale: 2.5
+    scale: 10.0
     bias: False
     constraint: buffer
     loss_batch: 0 # use batch of agents in rollout instead of all agents
