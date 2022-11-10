@@ -40,7 +40,7 @@ class ADPG(BaseAgent):
             device=self.config.device,
         ).to(self.config.device)
 
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.config.training.learning_rate, eps=1e-5)            # self.optimizer = optim.SGD(self.model.parameters(), lr=self.config.training.learning_rate)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=self.config.training.learning_rate, eps=1e-5)
 
         if self.config.agent.evaluate:
             self.load_model()
@@ -54,7 +54,7 @@ class ADPG(BaseAgent):
 
     def _init_hidden(self) -> Tuple[torch.tensor, torch.tensor]:
         """
-        :return: A tuple representing a newly initialized hidden LSTM state for a newly encountered agent.
+            :return: A tuple representing a newly initialized hidden LSTM state for a newly encountered agent.
         """
         return (
             torch.zeros(self.config.agent.adpg.architecture[-1], device=self.config.device),
@@ -62,12 +62,18 @@ class ADPG(BaseAgent):
         )
 
     def test(self) -> None:
+        """
+            Evaluate the agent. Viewing the performance is performed either using the vector files created by the
+            simulator, or by utilizing weights and biases logging.
+            :return:
+        """
         state, infos = self.env.reset()
         hc_dict = {}
         timesteps = 0
 
         with torch.no_grad():
-            while True:
+            done = False
+            while not done:
                 hc = []
                 for info in infos:
                     if info['key'] in hc_dict:
@@ -88,7 +94,6 @@ class ADPG(BaseAgent):
                 self.log_data(timesteps, infos)
 
                 timesteps += state.shape[0]
-            print(state, _, done, infos)
 
     def train(self) -> None:
         timesteps = self.timesteps + 1 if self.timesteps > 0 else 0
@@ -139,8 +144,9 @@ class ADPG(BaseAgent):
                     self.log_data(timesteps, infos)
 
             agent_steps = [len(self.rollout[agent_key]['reward']) for agent_key in self.rollout.keys() if len(self.rollout[agent_key]['reward']) > 0]
-            print(f"Policy Update: {num_updates}/{self.config.training.max_num_updates} after {timesteps} total timesteps \n  Per agent timestep statistics: min {min(agent_steps)} max {max(agent_steps)} mean: {np.mean(agent_steps)} std: {np.std(agent_steps)}")
-            loss_stats = self._calculate_loss(timesteps)
+            print(f"Policy Update: {num_updates}/{self.config.training.max_num_updates} after {timesteps} total timesteps \nPer agent inner-batch step statistics: min {min(agent_steps)} max {max(agent_steps)} mean: {np.mean(agent_steps)} std: {np.std(agent_steps)}")
+
+            loss_stats = self._calculate_loss()
 
             if loss_stats is not None:
                 reward_loss, action_loss, scenario_loss, num_agents = loss_stats
@@ -152,6 +158,7 @@ class ADPG(BaseAgent):
                     for key in scenario_loss.keys():
                         self.config.logging.wandb.log({f"Loss_scenario_{key}": scenario_loss[key]}, step=timesteps)
                 num_updates += 1
+
                 self.save_model(checkpoint=timesteps, loss=reward_loss + action_loss)
             else:
                 print(f'Update failed: finished rollout at {timesteps} timesteps without any update')
@@ -160,10 +167,11 @@ class ADPG(BaseAgent):
 
     def _parse_action(self, actions: torch.tensor) -> List[float]:
         """
-        Convert the action from a network output value to a rate multiplier value accepted by the environment.
+            Convert the action from a network output value to a rate multiplier value accepted by the environment.
 
-        :param actions: A tensor of size batch x 1.
-        :return: List (batch elements) of multipliers. Each element represents how much the current rate should change.
+            :param actions: A tensor of size batch x 1.
+            :return: List (batch elements) of multipliers. Each element represents how much the current rate should
+                change.
         """
         actions = flatten(actions.cpu().numpy())
         for i, action in enumerate(actions):
@@ -180,19 +188,19 @@ class ADPG(BaseAgent):
             hc: Tuple[torch.tensor, torch.tensor]
     ) -> Tuple[torch.tensor, Tuple[torch.tensor, torch.tensor]]:
         """
-        :param state: A batch of observations from the environments.
-        :param hc: The hidden state of the LSTM (if applicable).
-        :return: The action to be performed at this state and the updated LSTM hidden state (if applicable).
+            :param state: A batch of observations from the environments.
+            :param hc: The hidden state of the LSTM (if applicable).
+            :return: The action to be performed at this state and the updated LSTM hidden state (if applicable).
         """
         action, hc = self.model(state, hc)
         action = torch.tanh(action)
         return action, hc
 
-    def _calculate_loss(self, timesteps, eps=1e-8) -> float:
+    def _calculate_loss(self):
         """
-        Calculate the loss for the adpg agent:
-        Action smoothing loss is added to push sequential actions to be similar (stabilize the output).
-        :return: The loss (scalar value).
+            Calculate the loss for the adpg agent:
+            Action smoothing loss is added to push sequential actions to be similar (stabilize the output).
+            :return: Loss metrics.
         """
         agents = [key for key in list(self.rollout.keys()) if len(self.rollout[key]['reward']) > 1]
         if self.config.agent.adpg.loss_batch > 0:
@@ -201,7 +209,7 @@ class ADPG(BaseAgent):
         
         def get_loss(action, reward, batch_size, scenario, sl, a_sl, scenario_loss, gamma):
             """
-            Memory efficiency -> tensors allocated within the scope will be de-allocated before we use backward()
+                Memory efficiency -> tensors allocated within the scope will be de-allocated before we use backward()
             """
             if 0 < gamma < 1:
                    avg_reward_to_go = torch.stack([torch.stack([(r*(gamma**idx)) for idx, r in enumerate(reward[i:])], dim=0).mean() for i in range(batch_size)], dim=0).squeeze()
@@ -211,9 +219,10 @@ class ADPG(BaseAgent):
             flow_reward_loss = sl*(action * avg_reward_to_go).mean()
 
             action_diff = torch.stack([((a_sl*0.5*(action[i] - action[i+1:])**2).sum()) / len(action[i:]) for i in range(batch_size) if len(action[i+1:]) > 0  ], dim=0).sum()
-            flow_action_loss = action_diff / batch_size # number of elements
+            flow_action_loss = action_diff / batch_size
 
-            scenario_loss[scenario] += flow_reward_loss.detach().item() # classifiy reward by scenario for visualization
+            # For visualization, we separate the loss by scenario
+            scenario_loss[scenario] += flow_reward_loss.detach().item()
             if batch_size > 1:
                 scenario_loss[scenario] += flow_action_loss.detach().item()
  
@@ -230,6 +239,8 @@ class ADPG(BaseAgent):
 
         self.optimizer.zero_grad()
 
+        # ADPG considers multiple agents sharing the same control policy.
+        # This loop aggregates the losses over agents, performing a joint optimization step.
         for agent_key in agents:
             agent_rollout = self.rollout[agent_key]
 
@@ -269,6 +280,6 @@ class ADPG(BaseAgent):
         self.optimizer.step()
         
         for key in scenario_loss_agents.keys():
-            scenario_loss[key] = scenario_loss[key] / num_agents  # divide scenario loss by number of agents per scenario
-        # return parts of loss for monitoring
+            scenario_loss[key] = scenario_loss[key] / num_agents
+
         return total_reward_loss, total_action_loss, scenario_loss, num_agents

@@ -11,12 +11,13 @@ from .utils.feature_history import FeatureHistory
 from .utils.server import Server
 from .utils import DEFAULT_PORT
 
+
 class OMNeTpp(gym.Env):
     """
-    A GYM wrapper for the OMNeTpp simulator.
-    This environment is ASYNCHRONOUS. As opposed to the standard synchronous GYM envs, the OMNeTpp simulator can be
-    viewed as a multi-agent environment. At each step the simulator will return an observation for ONE of the agents.
-    This wrapper will maintain the history and information over all observed agents.
+        A GYM wrapper for the OMNeTpp simulator.
+        This environment is ASYNCHRONOUS. As opposed to the standard synchronous GYM envs, the OMNeTpp simulator can be
+        viewed as a multi-agent environment. At each step the simulator will return an observation for ONE of the agents.
+        This wrapper will maintain the history and information over all observed agents.
     """
     def __init__(self, scenario: str, simulation_number: int, env_number: int, config: Config):
         self.config = config
@@ -45,11 +46,12 @@ class OMNeTpp(gym.Env):
         self.env_number = env_number
         self._configure_omnet()
 
-        self.action_space = gym.spaces.Box(np.array([-1]), np.array([1]), dtype=np.float32)  #FIXME float32
-        number_of_features = self.feature_history.number_of_features * self.config.env.history_length#TODO why to calculate it like this?
+        self.action_space = gym.spaces.Box(np.array([-1]), np.array([1]), dtype=np.float32)
+        number_of_features = self.feature_history.number_of_features * self.config.env.history_length
         self.observation_space = gym.spaces.Box(np.tile(-np.inf, number_of_features),
                                                 np.tile(np.inf, number_of_features),
                                                 dtype=np.float32)
+
         self.previous_host_flow_tag = None
         self.previous_cur_rate = 0
 
@@ -57,7 +59,7 @@ class OMNeTpp(gym.Env):
 
     def _configure_omnet(self) -> None:
         """
-        In order to run OMNeT we need to ensure that several environment variables are set.
+            To initialize the simulator, we need to ensure that several environment variables are set.
         """
         if 'NVIDIACCSim/sim' not in os.getcwd():
             os.chdir(self.config.env.omnet.simulator_path)
@@ -67,28 +69,29 @@ class OMNeTpp(gym.Env):
 
     def seed(self, seed: int = None) -> None:
         """
-        Environment randomness is set by the simulator and is not controlled from here.
+            Environment randomness is set by the simulator and is not controlled from here.
         """
         pass
 
     def reset(self) -> Tuple[np.ndarray, Dict]:
         """
-        Reset will close the running env and open a new instance..
+            Reset will close the running env and open a new instance..
 
-        :return: The state and info received from the new simulator.
+            :return: The state and info received from the new simulator instance.
         """
         if self.env_running:
             self.close()
             time.sleep(0.001)
 
+        # The scenario name and test number will define the test config, including which port the simulator will listen
+        # on for communication with our gym env.
         print(f"restarting env: {self.scenario}")
         subprocess.Popen([
             self.config.env.omnet.exe_path, self.config.env.omnet.config_path,
             '-c', self.scenario_name,
-            '-r', str(self.test_number), '-u' ,'Cmdenv',
-             ], close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-            #  ])
-        #    
+            '-r', str(self.test_number),
+            '-u', 'Cmdenv',
+        ], close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
         
         self.env_running = True
 
@@ -108,13 +111,17 @@ class OMNeTpp(gym.Env):
 
     def step(self, action: float) -> Tuple[np.ndarray, float, bool, Dict]:
         """
-        Send the action to the environment. The action provided to the env is sent to the previous observed (flow_tag)
-        combination.
+            Send the action to the environment. The action provided to the env is sent to the previous observed (flow_tag)
+            combination.
 
-        :param action: A float representing the relative increase/decrease (multiplier) for the agent's requested send
-            rate.
-        :return: The updated state, reward, done and information for a given (flow_tag) combination.
+            :param action: A float representing the relative increase/decrease (multiplier) for the agent's requested send
+                rate.
+            :return: The updated state, reward, done and information for a given (flow_tag) combination.
         """
+        # The simulator is asyncronous. A single instance will control multiple hosts (servers) and within them
+        # multiple QPs (flows).
+        # Each (host, flow) tuple corresponds to a different and unique agent. As such, we perform internal bookkeeping
+        # to differentiate between the observations and actions performed by each agent.
         if self.previous_host_flow_tag[0] not in self.last_bw_request:
             self.last_bw_request[self.previous_host_flow_tag[0]] = {}
         self.last_bw_request[self.previous_host_flow_tag[0]][self.previous_host_flow_tag[1]] = min(self.previous_cur_rate * action, 1.)
@@ -126,6 +133,7 @@ class OMNeTpp(gym.Env):
         #print(f"updating action {action} for: {self.scenario + '_' + str(self.env_number) + '/' + self.previous_host_flow_tag[0] + '/' + self.previous_host_flow_tag[1]}")
         if raw_features is None:
             return self.reset()
+
         self.feature_history.update_history(raw_features)
       
         state, info, _ = self.feature_history.process_observation(raw_features.host, raw_features.flow_tag)
@@ -145,11 +153,18 @@ class OMNeTpp(gym.Env):
 
     def _calculate_reward(self, action: float, info: Dict) -> float:
         """
-        Returns a reward signal for the agent.
+            Returns a reward signal for the agent. Either uses one of the pre-defined options in here, or one of the
+            values from the feature_history, such as rtt_inflation.
 
-        :param total_requested_rate: The total combined rate requested by all the flow_tags (flows).
-        :param info: Information dictionary with local information on the current flow_tag (flow).
-        :return: A scalar reward.
+            We provide several options:
+                - General - combination of latency and packet loss.
+                - Distance - assuming the optimal rate is 1/(total number of flows), the reward is the distance from
+                    this value.
+                - Constrained - the agent should focus on rtt_inflation but ensure cnp ratio is below threshold.
+                - Other - defined in the config and passed through the info dict.
+
+            :param info: Information dictionary with local information on the current flow_tag (flow).
+            :return: A scalar reward.
         """
 
         if self.config.env.reward == 'general':

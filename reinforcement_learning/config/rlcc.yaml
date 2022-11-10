@@ -11,11 +11,11 @@ env:
   history_length: 2
   omnet:
     simulator_path: ../NVIDIACCSim/sim  # relative to reinforcement_learning dir 
-    exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path ##FIXME
-    config_path: omnetpp.ini #FIXME#ccsim.ini # relative to run_path
+    exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
+    config_path: omnetpp.ini
   reward: rtt_reward
   port_increment: 10
-  save_path: '.'
+  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/train_default_config/
 
 training:
   max_num_updates: 1000

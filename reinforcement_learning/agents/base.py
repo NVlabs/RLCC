@@ -43,7 +43,6 @@ class BaseAgent:
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
             }, save_path + self.config.agent.agent_type + name)
-        
 
     def load_model(self):
         name = ''

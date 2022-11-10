@@ -74,11 +74,11 @@ class DummyVecEnvWithResetInfo(VecEnv):
         env = self.envs[0]  #start training from env 0 (first env)
         VecEnv.__init__(self, len(env_fns), env.observation_space, env.action_space)
 
-        obs_spaces = self.observation_space.spaces if isinstance(self.observation_space, gym.spaces.Tuple) else (self.observation_space,)  #TODO what this checks? isinstance(self.observation_space, gym.spaces.Tuple)
+        obs_spaces = self.observation_space.spaces if isinstance(self.observation_space, gym.spaces.Tuple) else (self.observation_space,)
         self.buf_obs = [np.zeros((self.num_envs,) + tuple(s.shape), s.dtype) for s in obs_spaces]
-        self.buf_dones = np.zeros((self.num_envs,), dtype=np.bool) #TODO what it would be used for?
-        self.buf_rews = np.zeros((self.num_envs,), dtype=np.float32) #TODO what it would be used for?
-        self.buf_infos = [{} for _ in range(self.num_envs)] #TODO what it would be used for?
+        self.buf_dones = np.zeros((self.num_envs,), dtype=bool)
+        self.buf_rews = np.zeros((self.num_envs,), dtype=np.float32)
+        self.buf_infos = [{} for _ in range(self.num_envs)]
         self.actions = None
 
     def step_async(self, actions):
@@ -86,14 +86,11 @@ class DummyVecEnvWithResetInfo(VecEnv):
 
     def step_wait(self):
         for i in range(self.num_envs):
-            # ignore = True
-            # j = 0 # try counter
-            # while ignore and j < 10: #if ignorable flow than just perform another step until we get non-ignorable flow
             data = self.envs[i].step(self.actions[i])
             if len(data) == 4:
                 obs_tuple, self.buf_rews[i], self.buf_dones[i], self.buf_infos[i] = data
             else:
-                obs_tuple, self.buf_infos[i] = data # reset
+                obs_tuple, self.buf_infos[i] = data
                 self.buf_rews[i] = 0
             if isinstance(obs_tuple, (tuple, list)):
                 for t, x in enumerate(obs_tuple):

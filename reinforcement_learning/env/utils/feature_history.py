@@ -16,46 +16,43 @@ ProcessedFeatures = namedtuple(
 
 
 def calc_rtt_reward(config, rtt_inflation, rate):
-    """Calculates RTT reward function (rtt_inflation * sqrt(rate))
-    reward function needs to be equal to target
+    """
+        Calculates RTT reward function (rtt_inflation * sqrt(rate))
+        reward function needs to be equal to target
 
-    We used to divide rtt (nanoseconds) by 8192 -> this makes issues with fixed-point on HW as we have a high risk for overflow.
-    For example: max_factor = 1.5 when we divide by 8192 and factor = 12.5, can result in large overflows when we try to do the multiplication
-    in fixed-point, but 1.5*8192 = 12288 which is a number in nanoseconds --> a/x -b = (a - bx) / x. This means that our baseline is around 12 microseconds
-    It is much simpler to use rtt in microseconds instead of nanoseconds -> this is done by dividing by 1024, if we replace 8192 with 1024
-    we can divide by 1024 and multiply the factor by 8 and use maxfactor = 12288 and we get the same exact result but now it is much more stable for HW
-    We could have done the same by dividing by 8192 and using maxfactor = 12288 but now we have a value in ~ microseconds which is interpretable
-    --> our target rtt_inflation is in microseconds 
+        RTT and rtt_inflation are in microseconds
 
-    Args:
-        rtt ([float]): normalized rtt values
-        rate ([float]): current rate
-        factor ([float]): 
-        max_factor ([float]): threshold qlength value (below this threshold set reward to 0)
-        power ([float]): take power of function
+        Args:
+            rtt ([float]): normalized rtt values
+            rate ([float]): current rate
+            factor ([float]):
+            max_factor ([float]): threshold queue length value (below this threshold set reward to 0)
+            power ([float]): take power of function
 
-    Returns:
-        [float]: inflation value
+        Returns:
+            [float]: inflation value
     """
     rtt_inflation = max(rtt_inflation - config.agent.adpg.beta, 0)
     reward = rtt_inflation * np.sqrt(rate)
     reward = (reward - config.agent.adpg.target) * config.agent.adpg.scale
     return reward
 
+
 class FeatureHistory:
     """
-    The features history for each host-flow_tag pair should contain the past N monitor intervals, where each MI contains:
-        1. RTT diff (for K RTT packets in each MI, will contain RTT_last - RTT_first)
-        2. Time difference between when first and last RTT were requested.
-        3. Width of the entire MI
-        4. Proportion of ACKs (ACKs received / packets sent)
+        The features history for each host-flow_tag pair should contain the past N monitor intervals (MI),
+        where each MI contains:
+            1. RTT diff (for K RTT packets in each MI, will contain RTT_last - RTT_first)
+            2. Time difference between when first and last RTT were requested.
+            3. Width of the entire MI
+            4. Proportion of ACKs (ACKs received / packets sent)
     """
     def __init__(self, config, simulation_number):
         self.config = config
         self.number_of_features = len(self.config.agent.agent_features) 
         self.state_history_dict = {}
         self.action_history_dict = {}
-        self.simulation_number = simulation_number # for debugging
+        self.simulation_number = simulation_number
 
     def reset(self) -> None:
         self.state_history_dict = {}
@@ -80,9 +77,9 @@ class FeatureHistory:
     def _get_action(self, host: str, flow_tag: str):
         """
 
-        :param host: The host ID
-        :param flow_tag: flow_tag ID
-        :return: The previous action the agent controlling this flow took.
+            :param host: The host ID
+            :param flow_tag: flow_tag ID
+            :return: The previous action the agent controlling this flow took.
         """
         
         key = host + ' ' + flow_tag
@@ -93,10 +90,11 @@ class FeatureHistory:
 
     def _process_features(self, raw_features: RawFeatures) -> ProcessedFeatures:
         """
-        Converts the raw features provided by the simulator to a processed format that can be provided to the agents.
+            Converts the raw features provided by the simulator to a processed format that can be provided to the
+            agents.
 
-        :param raw_features: A namedtuple of features received by the environment simulator.
-        :return: The processed features.
+            :param raw_features: A namedtuple of features received by the environment simulator.
+            :return: The processed features.
         """
         return ProcessedFeatures(
             nack_ratio=raw_features.nacks_received * 1. / max(raw_features.packets_sent, 1.),
@@ -104,19 +102,20 @@ class FeatureHistory:
             bandwidth=raw_features.bytes_sent * 1. / (raw_features.monitor_interval_width) ,
             bytes_sent=raw_features.bytes_sent,
             rtt_inflation=raw_features.rtt_packet_delay,
-            cur_rate = raw_features.cur_rate,
+            cur_rate=raw_features.cur_rate,
             action=self._get_action(raw_features.host, raw_features.flow_tag),
             rtt_reward=calc_rtt_reward(self.config, raw_features.rtt_packet_delay, raw_features.cur_rate),
         )
 
     def process_observation(self, host: str, flow_tag: str) -> Tuple[np.ndarray, Dict, ProcessedFeatures]:
         """
-        Given a host and flow_tag combination, returns the env information.
+            Given a host and flow_tag combination, returns the env information.
 
-        :param host: The host id.
-        :param flow_tag: The flow_tag (flow) id. This identifier is unique per each host but multiple hosts can have identical flow_tags.
-        :return: The features provided to the agent, important information that can be logged and the last processed
-            features.
+            :param host: The host id.
+            :param flow_tag: The flow_tag (flow) id. This identifier is unique per each host but multiple hosts can have
+                identical flow_tags.
+            :return: The features provided to the agent, important information that can be logged and the last processed
+                features.
         """
         key = host + ' ' + flow_tag
 

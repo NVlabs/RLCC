@@ -13,7 +13,6 @@ def parse_args():
 
     # Env Parameters
     parser.add_argument('--scenarios', type=str, default=-1, nargs='*', help='List of scenarios to parallelize during training')
-    # parser.add_argument('--scenarios', type=str, default=['2_1'], nargs='*', help='List of scenarios to parallelize during training')
     parser.add_argument('--envs_per_scenario', type=int, default=1, help='Number of instances of each scenario')
     parser.add_argument('--max_timesteps', type=int, default=-1)
     parser.add_argument('--history_length', type=int, default=-1, help='Agent state contains history of history_length-1 past observations')
@@ -29,7 +28,7 @@ def parse_args():
 
     # Learning Parameters
     parser.add_argument('--save_name', default='rtt_debug', type=str)
-    parser.add_argument('--checkpoint', default='', type=str)  # FIXME
+    parser.add_argument('--checkpoint', default='', type=str)
 
     parser.add_argument('--learning_rate', default=0.01, type=float)
     parser.add_argument('--discount', default=-1, type=float)
