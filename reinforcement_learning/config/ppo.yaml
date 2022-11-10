@@ -61,10 +61,6 @@ agent:
       ppo_ratio_clip: .2
       ppo_batch_size: 4
       ppo_optimization_epochs: 4
-  adpg:
-    beta: 1.5
-    scale: 10.0
-    target: 0.064
 
 logging:
   wandb: false  # Logging using weights and biases

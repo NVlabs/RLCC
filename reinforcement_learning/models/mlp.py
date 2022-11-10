@@ -1,11 +1,8 @@
-from numpy.core.numeric import ones
 import torch
 from torch import nn
 import numpy as np
 from typing import List, Tuple
 from .model_utils import init
-import math
-from torch.nn import functional as F
 
 RNN_TO_MODEL = {'LSTM': nn.LSTMCell, 'GRU': nn.GRUCell, 'RNN': nn.RNNCell}
 
@@ -37,7 +34,6 @@ class MLP(nn.Module):
 
         self.net = nn.ModuleList(layers)
 
-        # self.output_layer = init_(nn.Linear(previous_dim, output_size))
         self.output_layer = init_(nn.Linear(previous_dim, output_size, bias=bias))
 
     def forward(self, x: torch.tensor,  hc: Tuple[torch.tensor, torch.tensor] = None ) -> Tuple[torch.tensor, Tuple[torch.tensor, torch.tensor]]:
