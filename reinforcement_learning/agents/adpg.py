@@ -72,8 +72,7 @@ class ADPG(BaseAgent):
         timesteps = 0
 
         with torch.no_grad():
-            done = False
-            while not done:
+            while True:
                 hc = []
                 for info in infos:
                     if info['key'] in hc_dict:
