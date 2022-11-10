@@ -15,7 +15,6 @@ class Actor(nn.Module):
         self.net = MLP(
             input_size=observation_space.shape[0],
             output_size=self.config.agent.ppo.actor_architecture[-1],
-            activation_function=self.config.agent.activation_function,
             hidden_sizes=self.config.agent.ppo.actor_architecture
         )
 
@@ -38,7 +37,6 @@ class Critic(nn.Module):
         self.net = MLP(
             input_size=observation_space.shape[0],
             output_size=1,
-            activation_function=self.config.agent.activation_function,
             hidden_sizes=self.config.agent.ppo.critic_architecture
         )
 

@@ -33,7 +33,6 @@ agent:
 #    - requested_rate
   discount: .99
   linear_lr_decay: False
-  activation_function: relu
   ppo:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2

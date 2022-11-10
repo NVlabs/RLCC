@@ -8,7 +8,7 @@ def parse_args():
     parser.add_argument('--config', default='rlcc', help='Name of the config file to be loaded')
 
     # General Parameters
-    parser.add_argument('--agent', dest='agent_type', type=str, choices=['PPO', 'DQN', 'SUPERVISED', 'random', 'CONSTRAINED', 'ADPG', 'None'], default='ADPG')
+    parser.add_argument('--agent', dest='agent_type', type=str, choices=['PPO', 'DQN', 'SUPERVISED', 'random', 'CONSTRAINED', 'ADPG', 'None'])
     parser.add_argument('--port_increment', type=int, default=-1, help='Increase the default port number. Useful if a prior run has crashed and the ports are currently in use')
 
     # Env Parameters
@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument('--envs_per_scenario', type=int, default=1, help='Number of instances of each scenario')
     parser.add_argument('--max_timesteps', type=int, default=-1)
     parser.add_argument('--history_length', type=int, default=-1, help='Agent state contains history of history_length-1 past observations')
-    parser.add_argument('--evaluate', action='store_true')  # FIXME
+    parser.add_argument('--evaluate', action='store_true')
     parser.add_argument('--log_data', action='store_true')
 
     parser.add_argument('--action_multiplier_dec', default=-1, type=float)

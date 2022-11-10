@@ -15,6 +15,7 @@ except:
 
 sys.path.append(os.getcwd())
 
+
 def main(config: Config) -> None:
     """
     After initializing the environments and the agent (based on the provided configuration requriements), runs the
