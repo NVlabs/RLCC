@@ -4,14 +4,12 @@ env:
   envs_per_scenario: 8
   history_length: 4
   omnet:
-    recv_len: 15  # number of features received from the OMNeT simulator
-    size_of_data: 4  # size of float or uint32_t
-    simulator_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/MlnxCCSim #../simulator  # relative to reinforcement_learning dir ##FIXME changed path
-    exe_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/MlnxCCSim/bin/ccsim_release #../bin/ccsim_release  # relative to run_path ##FIXME
-    config_path: /swgwork/bfuhrer/projects/rlcc/new_simulator/MlnxCCSim/sim/tests.ini #FIXME#ccsim.ini # relative to run_path
+    simulator_path: ../NVIDIACCSim/sim  # relative to reinforcement_learning dir
+    exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
+    config_path: omnetpp.ini
   reward: general
-  default_port: 5555
-  port_increment: 0
+  port_increment: 10
+  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/train_default_config/
 
 training:
   max_timesteps: 1000000
