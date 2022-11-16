@@ -104,12 +104,22 @@ class ADPG(BaseAgent):
         
         rollout_counter = {}
 
-        print(f'Initiating training \n Collecting rollout for {self.config.agent.adpg.rollout_length} steps per environemnt')
+        print(f'Initiating training')
+
+        warmup_updates = self.config.agent.adpg.warmup_updates
+        warmup_length = self.config.agent.adpg.warmup_length
+
+        print(f'Update policy after a minimum of : {self.config.agent.adpg.rollout_length} steps per flow after a warmup of: {warmup_updates} updates of {warmup_length} total steps')
         while num_updates <= self.config.training.max_num_updates:
             # Perform a rollout
-            steps_per_env = 0
+            min_counter = 0
+            # max_counter = 0
+            warmup_step = 0
+
+            is_warmup = num_updates < warmup_updates
+
             with torch.no_grad():
-                while steps_per_env < self.config.agent.adpg.rollout_length:
+                while warmup_step < warmup_length if is_warmup else min_counter < self.config.agent.adpg.rollout_length:
                     hc = []
                     for info in infos:
                         if info['agent_key'] in hc_dict:
@@ -137,10 +147,14 @@ class ADPG(BaseAgent):
                             rollout_counter[info['agent_key']] += 1
                         infos[i]['reward'] = reward[i].detach().cpu().item()
 
+                    warmup_step += 1
+                    min_counter = min(rollout_counter.values())
                     timesteps += 1 
-                    steps_per_env += 1
 
                     self.log_data(timesteps, infos)
+                    if warmup_step > self.config.agent.adpg.max_step_size:
+                        print(f"break steps : {warmup_step}>{self.config.agent.adpg.max_step_size}")
+                        break
 
             agent_steps = [len(self.rollout[agent_key]['reward']) for agent_key in self.rollout.keys() if len(self.rollout[agent_key]['reward']) > 0]
             print(f"Policy Update: {num_updates}/{self.config.training.max_num_updates} after {timesteps} total timesteps \nPer agent inner-batch step statistics: min {min(agent_steps)} max {max(agent_steps)} mean: {np.mean(agent_steps)} std: {np.std(agent_steps)}")
@@ -149,8 +163,6 @@ class ADPG(BaseAgent):
 
             if loss_stats is not None:
                 reward_loss, action_loss, scenario_loss, num_agents = loss_stats
-                print(f"Updated based on: {num_agents}")
-
                 self.rollout = {}
                 if self.config.logging.wandb is not None:
                     self.config.logging.wandb.log({"Loss": reward_loss + action_loss, "reward_loss": reward_loss, "action_loss": action_loss, "num_updates": num_updates}, step=timesteps)

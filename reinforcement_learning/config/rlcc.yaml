@@ -15,7 +15,11 @@ env:
     config_path: omnetpp.ini
   reward: rtt_reward
   port_increment: 10
+<<<<<<< HEAD
   save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/train_default_config/
+=======
+  save_path: '../../reinforcement_learning/saved_models' # cwd is simulator_path
+>>>>>>> added train by min per agent
 
 training:
   max_num_updates: 1000
@@ -36,21 +40,24 @@ agent:
   adpg:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2
-    rollout_length: 1024
+    rollout_length: 3
     architecture:
+      - 12
       - 12
     use_rnn: null
     target: 0.064
     action_loss_coeff: 1
     beta: 1.5
     loss_scale: 2.5
-    scale: 10.0
+    scale: 12.5
     bias: False
     constraint: buffer
     loss_batch: 0 # use batch of agents in rollout instead of all agents
     max_batch_size: 8192
-    max_step_size: 8192
+    max_step_size: 5000
     base_rtt: 8192.0
+    warmup_length: 1024
+    warmup_updates: 50
 
 logging:
   wandb: false  # Logging using weights and biases
