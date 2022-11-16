@@ -15,11 +15,7 @@ env:
     config_path: omnetpp.ini
   reward: rtt_reward
   port_increment: 10
-<<<<<<< HEAD
   save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/train_default_config/
-=======
-  save_path: '../../reinforcement_learning/saved_models' # cwd is simulator_path
->>>>>>> added train by min per agent
 
 training:
   max_num_updates: 1000
