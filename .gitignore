@@ -5,3 +5,4 @@ NVIDIACCSim.tgz
 reinforcement_learning/wandb
 wandb/
 reinforcement_learning/saved_models
+reinforcement_learning/output

@@ -17,6 +17,7 @@ env:
   port_increment: 10
   save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/train_default_config/
 
+
 training:
   max_num_updates: 1000
   learning_rate: 0.01
@@ -44,7 +45,7 @@ agent:
     target: 0.064
     action_loss_coeff: 1
     beta: 1.5
-    loss_scale: 2.5
+    loss_scale: 1.0
     scale: 12.5
     bias: False
     constraint: buffer
