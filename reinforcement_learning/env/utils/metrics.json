@@ -5,7 +5,7 @@
             "qps": "attr Q"
         },
         "metrics": {
-            "bw": {
+            "switch_bw": {
                 "param_name": "egress-BW-Gbps",
                 "field": "mean",
                 "filters": {
@@ -64,7 +64,7 @@
             "qps": "attr QPP"
         },
         "metrics": {
-            "bw": {
+            "switch_bw": {
                 "param_name": "egress-BW-Gbps",
                 "field": "mean"
             },
@@ -120,7 +120,7 @@
                 }
             },
             "completion_time": {
-                "param_name": "genCompletionTime",
+                "param_name": "streamCompletionTime",
                 "field": null,
                 "operation": "completion_time*1000000",
                 "filters": {

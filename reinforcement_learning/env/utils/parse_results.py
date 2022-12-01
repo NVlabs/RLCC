@@ -6,9 +6,9 @@ import pandas as pd
 import json
 
 from .sca_parser import eval_sim_run
-# from sca_parser import eval_sim_run
 
-data_title = ['#Hosts', '#QPs', '#Flows', 'Total BW', 'BW per QP','Host BW', 'Goodput BW', 'Fairness [min host bw / max]' ,  'Latency [usec]', 'Packet loss [Gbit/s]', 'Dropped MB']
+
+data_title = ['#Hosts', '#QPs', '#Flows', 'Switch BW', 'BW per QP','Host BW', 'Goodput BW', 'Fairness [min host bw / max]' ,  'Latency [usec]', 'Packet loss [Gbit/s]', 'Dropped MB']
 
 long_short_data_title = ['#Hosts', '#QPs', '#Flows', 'Long BW]', 'Long Goodput BW', 'Completion Time', 'Packet Loss', 'Dropped MB']
 RESULTS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'NVIDIACCSim/sim/results')
@@ -17,7 +17,7 @@ def parse_many_to_one(data):
     if data is None:
         return None
 
-    total_bw = np.mean(data['bw'])
+    total_bw = np.mean(data['switch_bw'])
     bw_per_qp = np.mean(data['bw_per_qp'])
     host_bw = np.mean(data['host_bw'])
     fairness = np.min(data['host_bw']) / np.max(data['host_bw'])
@@ -39,7 +39,7 @@ def parse_many_to_one(data):
 def parse_data_all_to_all(data):
     if data is None:
         return None
-    total_bw = np.mean(data['bw'])
+    total_bw = np.mean(data['switch_bw'])
     bw_per_qp = np.mean(data['bw_per_qp'])
     host_bw = np.mean(data['host_bw'])
     fairness = np.min(data['host_bw']) / np.max(data['host_bw'])
@@ -112,11 +112,4 @@ def parse_results(filename):
     scenario_data = [hosts, qps, hosts*qps] + scenario_data
     df = pd.DataFrame([scenario_data], columns= data_title if 'LongShort'  not in filename else long_short_data_title, index=['summary statistics'])
     df.to_csv(os.path.join(RESULTS_PATH, filename.replace('.sca', '.csv')))
-
-if __name__ == "__main__":
-    print(RESULTS_PATH)
-    # parse_results("RL_ShortSimult_ManyToOne-1440")
-    # # parse_results("RL_ShortSimult_AllToAll-1140")
-    # parse_results("RL_LongShort-1080")
-
 
