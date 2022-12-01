@@ -1,5 +1,7 @@
 import argparse
 
+from config.config import str2bool, str_parser
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -18,6 +20,8 @@ def parse_args():
     parser.add_argument('--history_length', type=int, default=-1, help='Agent state contains history of history_length-1 past observations')
     parser.add_argument('--evaluate', action='store_true')
     parser.add_argument('--log_data', action='store_true')
+    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--restart_on_end', action='store_true')
 
     parser.add_argument('--action_multiplier_dec', default=-1, type=float)
     parser.add_argument('--action_multiplier_inc', default=-1, type=float)
@@ -27,8 +31,8 @@ def parse_args():
     parser.add_argument('--config_path', default='None', type=str)  # Path for the OMNeT config file
 
     # Learning Parameters
-    parser.add_argument('--save_name', default='rtt_debug', type=str)
-    parser.add_argument('--checkpoint', default='', type=str)
+    parser.add_argument('--save_name', default=-1, type=str)
+    parser.add_argument('--checkpoint', default=-1, type=str)
 
     parser.add_argument('--learning_rate', default=0.01, type=float)
     parser.add_argument('--discount', default=-1, type=float)
@@ -74,9 +78,9 @@ def parse_args():
     parser.add_argument('--target_update_interval', type=int, default=-1)
 
     # Logging
-    parser.add_argument('--wandb', default=-1, type=str)  # Logging using weights and biases
+    parser.add_argument('--wandb', default=-1, type=str_parser)  # Logging using weights and biases
     parser.add_argument('--run_id', default='', type=str)  # Logging using weights and biases
-    parser.add_argument('--wandb_run_name', default='train_default_config', type=str)  # Logging using weights and biases
+    parser.add_argument('--wandb_run_name', default='train_default_config', type=str_parser)  # Logging using weights and biases
     parser.add_argument('--frequency', default=-1, type=int)
     parser.add_argument('--num_tests_to_log', default=1, type=int)
     parser.add_argument('--limit_flows', action='store_true')  # used to avoid over logging

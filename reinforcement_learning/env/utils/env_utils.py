@@ -68,8 +68,8 @@ class DummyVecEnvWithResetInfo(VecEnv):
         env = self.envs[0]  #start training from env 0 (first env)
         VecEnv.__init__(self, len(env_fns), env.observation_space, env.action_space)
 
-        obs_spaces = self.observation_space.spaces if isinstance(self.observation_space, gym.spaces.Tuple) else (self.observation_space,)
-        self.buf_obs = [np.zeros((self.num_envs,) + tuple(s.shape), s.dtype) for s in obs_spaces]
+        self.obs_spaces = self.observation_space.spaces if isinstance(self.observation_space, gym.spaces.Tuple) else (self.observation_space,)
+        self.buf_obs = [np.zeros((self.num_envs,) + tuple(s.shape), s.dtype) for s in self.obs_spaces]
         self.buf_dones = np.zeros((self.num_envs,), dtype=bool)
         self.buf_rews = np.zeros((self.num_envs,), dtype=np.float32)
         self.buf_infos = [{} for _ in range(self.num_envs)]
@@ -79,10 +79,13 @@ class DummyVecEnvWithResetInfo(VecEnv):
         self.actions = actions
 
     def step_wait(self):
+        done_envs = []
         for i in range(self.num_envs):
             data = self.envs[i].step(self.actions[i])
             if len(data) == 4:
                 obs_tuple, self.buf_rews[i], self.buf_dones[i], self.buf_infos[i] = data
+                if self.buf_dones[i]:
+                    done_envs.append(i)
             else:
                 obs_tuple, self.buf_infos[i] = data
                 self.buf_rews[i] = 0
@@ -91,6 +94,15 @@ class DummyVecEnvWithResetInfo(VecEnv):
                     self.buf_obs[t][i] = x
             else:
                 self.buf_obs[0][i] = obs_tuple
+        if len(done_envs) > 0:
+            self.buf_rews = np.delete(self.buf_rews,done_envs, axis=0)
+            self.buf_dones = np.delete(self.buf_dones,done_envs, axis=0)
+            self.buf_obs[0] = np.delete(self.buf_obs[0], done_envs, axis=0)
+            # print(self.buf_obs)
+            self.buf_infos = [info for i, info in enumerate(self.buf_infos) if i not in done_envs]
+            # self.buf_obs = [info for i, info in enumerate(self.buf_obs) if i not in done_envs]
+            self.envs = [info for i, info in enumerate(self.envs) if i not in done_envs]
+            self.num_envs -= len(done_envs)
         return self.buf_obs, self.buf_rews, self.buf_dones, self.buf_infos
 
     def reset(self):

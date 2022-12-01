@@ -5,6 +5,7 @@ import numpy as np
 from baselines.common.vec_env import VecEnv
 from config.config import Config
 from collections import defaultdict
+import pickle
 
 
 class BaseAgent:
@@ -18,26 +19,23 @@ class BaseAgent:
         self.logging_data = {}
         self.timesteps = 0
         self.log_key_hist = defaultdict(lambda: 0)
-        self.save_path = self.config.env.save_path
+        self.save_path = config.env.save_path
         if self.save_path[-1] != '/':
             self.save_path += '/'
 
+        
     def act(self, state: torch.tensor):
         raise NotImplementedError
 
     def train(self):
         raise NotImplementedError
 
-    def save_model(self, checkpoint, loss=None):
+    def save_model(self, checkpoint):
         save_path = f'{self.save_path}{self.config.agent.save_name}/'
         name = ''
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
         checkpoint_name = str(checkpoint)
         if len(self.config.agent.save_name) > 0:
             name = name + '_checkpoint_' + checkpoint_name
-            if loss is not None:
-                name += f'_{loss:.4f}'
             
         torch.save({
             'model_state_dict': self.model.state_dict(),
@@ -59,6 +57,7 @@ class BaseAgent:
         filename = [f for f in file_list if self.config.agent.agent_type + checkpoint in f and '.txt' not in f]
         checkpoint_state_dict = torch.load(f'{self.save_path}' + name + '/' + filename[0])
         self.model.load_state_dict(checkpoint_state_dict['model_state_dict'])
+        
 
     def test(self):
         raise NotImplementedError

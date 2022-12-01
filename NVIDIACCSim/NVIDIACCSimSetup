@@ -12,7 +12,8 @@ echo Run number - determain the number of Hosts and Qps in the system
 echo For more details please check omnetpp.ini file and README file
 echo
 echo exmple for running RL algorithm simultaneous start many to one traffic type with 2 hosts and one QP per host 
-echo " ../bin/ccsim_release omnetpp.ini -c RL_Simult_ManyToOne -r 0"
+echo " ../bin/ccsim_release omnetpp.ini -c RL_MediumSimult_ManyToOne -r 0"
 echo
 echo To see detailed list of all the runs of a configuration type:
-echo ../bin/ccsim_release omnetpp.ini -x RL_Simult_ManyToOne -g
+echo ../bin/ccsim_release omnetpp.ini -x RL_MediumSimult_ManyToOne -g
+echo "make sure to comment out: **.PORT_NO_TO_PYTHON = {5555..6666 step 1} before running the above command"

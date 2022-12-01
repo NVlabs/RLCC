@@ -1,12 +1,12 @@
 env:
   scenarios:
-    - "4_1"
-    - "4_16"
-    - "8_1"
-    - "4_16_a2a"
-    - "8_8_a2a"
-    - "8_16_a2a"
-    - "32_1"
+    - "4_1_m2o_l"
+    - "4_16_m2o_l"
+    - "8_1_m2o_l"
+    - "4_16_a2a_l"
+    - "8_8_a2a_l"
+    - "8_16_a2a_l"
+    - "32_1_m2o_l"
   envs_per_scenario: 1
   history_length: 2
   omnet:
@@ -14,8 +14,10 @@ env:
     exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
     config_path: omnetpp.ini
   reward: rtt_reward
-  port_increment: 10
-  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/train_default_config/
+  port_increment: 50
+  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/
+  verbose: False
+  restart_on_end: True
 
 
 training:

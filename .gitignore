@@ -1,5 +1,6 @@
 *.pyc
 NVIDIACCSim/sim/results/
+NVIDIACCSim/sim/metrics/
 .idea/
 NVIDIACCSim.tgz
 reinforcement_learning/wandb

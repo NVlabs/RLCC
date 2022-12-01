@@ -3,9 +3,10 @@ import os
 
 import yaml
 
+ROOT_PATH = os.path.dirname(__file__)
 
 class Config(dict):
-    def __init__(self, name='default', root_path='config', override=None, d=None):
+    def __init__(self, name='default', root_path=ROOT_PATH, override=None, d=None):
         dict.__init__(self)
 
         if d:
@@ -75,3 +76,8 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+def str_parser(v):
+    if v.lower() in ('null', 'none'):
+        return None
+    return v

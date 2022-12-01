@@ -11,6 +11,7 @@ The optimization can look over the entire rollout and optimize for some statisti
 import numpy as np
 import torch
 import os
+
 from pathlib import Path
 from torch import nn
 from torch import optim
@@ -70,7 +71,7 @@ class ADPG(BaseAgent):
         state, infos = self.env.reset()
         hc_dict = {}
         timesteps = 0
-
+        print('Starting tests')
         with torch.no_grad():
             while True:
                 hc = []
@@ -90,9 +91,15 @@ class ADPG(BaseAgent):
 
                 state, _, done, infos = self.env.step(self._parse_action(action))
 
+                if len(done) == 0:
+                    break
+
                 self.log_data(timesteps, infos)
 
                 timesteps += state.shape[0]
+
+        print('Finished tests')
+        
 
     def train(self) -> None:
         timesteps = self.timesteps + 1 if self.timesteps > 0 else 0
@@ -170,11 +177,11 @@ class ADPG(BaseAgent):
                         self.config.logging.wandb.log({f"Loss_scenario_{key}": scenario_loss[key]}, step=timesteps)
                 num_updates += 1
 
-                self.save_model(checkpoint=timesteps, loss=reward_loss + action_loss)
+                self.save_model(checkpoint=timesteps)
             else:
                 print(f'Update failed: finished rollout at {timesteps} timesteps without any update')
 
-        self.save_model(checkpoint=timesteps, loss=reward_loss + action_loss)
+        self.save_model(checkpoint=timesteps)
 
     def _parse_action(self, actions: torch.tensor) -> List[float]:
         """

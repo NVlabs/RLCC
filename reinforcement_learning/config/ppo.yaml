@@ -1,6 +1,6 @@
 env:
   scenarios:
-    - 2_to_1
+    - 2_1_m2o
   envs_per_scenario: 8
   history_length: 4
   omnet:

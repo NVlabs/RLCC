@@ -1,0 +1,146 @@
+{
+    "many-to-one": {
+        "params": {
+            "hosts": "attr SH",
+            "qps": "attr Q"
+        },
+        "metrics": {
+            "bw": {
+                "param_name": "egress-BW-Gbps",
+                "field": "mean",
+                "filters": {
+                    "netq": "index != 0"
+                }
+            },
+            "goodput": {
+                "param_name": "goodPutvecGbps",
+                "field": "mean",
+                "filters": {
+                    "host": "index != 0"
+                }
+            },
+            "bw_per_qp": {
+                "param_name": "gen-BW-MBps",
+                "field": "mean",
+                "operation": "bw_per_qp*8/1000*qps*hosts",
+                "filters": {
+                    "gen": "ancestorIndex(2)!=0"
+                }
+            },            
+            "host_bw": {
+                "param_name": "out-bw-Gbps",
+                "field": "mean",
+                "operation": "host_bw*hosts",
+                "filters": {
+                    "sched": "ancestorIndex(2)!=0"
+                }
+            },
+            "latency": {
+                "param_name": "pktLatencyVec:mean",
+                "field": null,
+                "filters": {
+                    "host": "index == 0"
+                }
+            },
+            "dropped_bw": {
+                "param_name": "dropped-BW-Gbps",
+                "field": "mean",
+                "filters": {
+                    "netq": "index==0"
+                }
+            },
+            "total_drop": {
+                "param_name": "MB-dropped",
+                "field": null,
+                "filters": {
+                    "netq": "index==0"
+                }
+            }
+        }
+    },
+    "all-to-all": {
+        "params": {
+            "hosts": "attr H",
+            "qps": "attr QPP"
+        },
+        "metrics": {
+            "bw": {
+                "param_name": "egress-BW-Gbps",
+                "field": "mean"
+            },
+            "bw_per_qp": {
+                "param_name": "gen-BW-MBps",
+                "field": "mean",
+                "operation": "bw_per_qp*8/1000*qps*(hosts-1)",
+                "filters": {
+                    "gen": "(int(index/qps)!=ancestorIndex(2)  and  int(index/qps)<hosts)"
+                }
+            },   
+            "goodput": {
+                "param_name": "goodPutvecGbps",
+                "field": "mean"
+            },        
+            "host_bw": {
+                "param_name": "out-bw-Gbps",
+                "field": "mean"
+            },
+            "latency": {
+                "param_name": "pktLatencyVec",
+                "field": "mean"
+            },
+            "dropped_bw": {
+                "param_name": "dropped-BW-Gbps",
+                "field": "mean"
+            },
+            "total_drop": {
+                "param_name": "MB-dropped",
+                "field": null
+            }
+        }
+
+    },
+    "long-short": {
+        "params": {
+            "hosts": "attr SH",
+            "qps": "attr Q"
+        },
+        "metrics": {
+            "goodput": {
+                "param_name": "goodPutvecGbps",
+                "field": "mean",
+                "filters": {
+                    "host": "index == 1"
+                }
+            },         
+            "host_bw": {
+                "param_name": "out-bw-Gbps",
+                "field": "mean",
+                "filters": {
+                    "sched": "ancestorIndex(2)==1"
+                }
+            },
+            "completion_time": {
+                "param_name": "genCompletionTime",
+                "field": null,
+                "operation": "completion_time*1000000",
+                "filters": {
+                    "gen": "ancestorIndex(2) > 1"
+                }
+            },
+            "dropped_bw": {
+                "param_name": "dropped-BW-Gbps",
+                "field": "mean",
+                "filters": {
+                    "netq": "index==0"
+                }
+            },
+            "total_drop": {
+                "param_name": "MB-dropped",
+                "field": null,
+                "filters": {
+                    "netq": "index==0"
+                }
+            }
+        }
+    }
+}

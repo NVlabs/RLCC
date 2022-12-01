@@ -10,7 +10,27 @@ from config.constants import py_to_c_scenarios
 from .utils.feature_history import FeatureHistory
 from .utils.server import Server
 from .utils import DEFAULT_PORT
+from .utils.parse_results import parse_results
 
+scenario_types = {"l": 'LongSimult', 'm': 'MediumSimult', 's': 'ShortSimult'}
+
+def parse_scenario(scenario):
+    scenario_name = 'RL_'
+    if 'vec' in scenario:
+        assert len(scenario) > 4 and scenario[-4:] == '_vec', "scenario name must end with _vec to use vectors" 
+        if 'm2o' in scenario or 'a2a' in scenario:
+            assert '_m_vec' in scenario in '_s_vec', "must specify scenario type: _s_vec, _m_vec, no long simult with vectors"
+        scenario_name += scenario_types[scenario.replace('_vec', '')[-1]] + '_Vectors'
+    elif 'm2o' in scenario or 'a2a' in scenario:
+        assert len(scenario) > 2 and scenario[-2:] in ['_s', '_m', '_l'], "must specify scenario type: _l, _s, _m" 
+        scenario_name += scenario_types[scenario[-1]]
+    if 'm2o' in scenario:
+        scenario_name += '_ManyToOne'
+    elif 'a2a' in scenario:
+        scenario_name += '_AllToAll'
+    else:
+        scenario_name += 'LongShort'
+    return scenario_name
 
 class OMNeTpp(gym.Env):
     """
@@ -20,24 +40,34 @@ class OMNeTpp(gym.Env):
         This wrapper will maintain the history and information over all observed agents.
     """
     def __init__(self, scenario: str, simulation_number: int, env_number: int, config: Config):
+        assert 'm2o' in scenario or 'a2a' in scenario or 'ls' in scenario, "Scenario name must contain either: m2o/a2a/ls"
         self.config = config
         self.simulation_number = simulation_number
         self.scenario = scenario
-        if config.agent.evaluate:
-            scenario += '_test'
 
         scenario_name_used = scenario
 
-        self.scenario_name, test_number, config_num_tests = py_to_c_scenarios[scenario]
+        host_qps = f"{scenario.split('_')[0]}_{scenario.split('_')[1]}"
 
-        algo_name = 'RL_'
+        
+        if 'm2o' in scenario:
+            test_number, config_num_tests = py_to_c_scenarios['m2o'][host_qps]
+        elif 'a2a' in scenario:
+                    test_number, config_num_tests = py_to_c_scenarios['a2a'][host_qps]
+        elif 'ls' in scenario:
+                    test_number, config_num_tests = py_to_c_scenarios['ls'][host_qps]
+ 
 
-        self.scenario_name = algo_name + self.scenario_name
-        print(f"Scenario: {scenario_name_used} -> {self.scenario_name} -r {test_number} ")
+        self.scenario_name = parse_scenario(scenario)
+       
 
         self.port = DEFAULT_PORT + simulation_number + self.config.env.port_increment
 
         self.test_number = test_number + (simulation_number + self.config.env.port_increment) * config_num_tests 
+        print(f"Scenario: {scenario_name_used} -> {self.scenario_name} -r {self.test_number} ")
+
+        self.scenario_raw_name = self.scenario_name + '-' + str(self.test_number)
+
         self.env_running = False
         
         self.feature_history = FeatureHistory(self.config, simulation_number)
@@ -85,13 +115,13 @@ class OMNeTpp(gym.Env):
 
         # The scenario name and test number will define the test config, including which port the simulator will listen
         # on for communication with our gym env.
-        print(f"restarting env: {self.scenario}")
+        print(f"Resetting env: {self.scenario_raw_name}")
         subprocess.Popen([
             self.config.env.omnet.exe_path, self.config.env.omnet.config_path,
             '-c', self.scenario_name,
             '-r', str(self.test_number),
             '-u', 'Cmdenv',
-        ], close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        ], stdout=None if self.config.env.verbose else subprocess.DEVNULL , stderr=None if self.config.env.verbose else subprocess.DEVNULL)
         
         self.env_running = True
 
@@ -132,7 +162,11 @@ class OMNeTpp(gym.Env):
         raw_features = self.server.step(action)
         #print(f"updating action {action} for: {self.scenario + '_' + str(self.env_number) + '/' + self.previous_host_flow_tag[0] + '/' + self.previous_host_flow_tag[1]}")
         if raw_features is None:
-            return self.reset()
+            if self.config.env.restart_on_end:
+                return self.reset()
+            else:
+                parse_results(self.scenario_raw_name)
+                return None, None, True, None
 
         self.feature_history.update_history(raw_features)
       

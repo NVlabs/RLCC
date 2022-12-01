@@ -1,0 +1,23 @@
+env:
+  scenarios:
+    - "2_1_m2o_s"
+  envs_per_scenario: 1
+  port_increment: 10
+  save_path: 'output/'  # relative path to reinforcement learning
+  verbose: True
+  restart_on_end: End
+
+agent:
+  save_name: ''
+  checkpoint: ''
+  evaluate: True
+
+logging:
+  wandb: false  # Logging using weights and biases
+  wandb_run_name: test  # Logging using weights and biases
+  run_id: ''
+  min_log_interval: 1024 # The minimum number of iterations before each log occurs
+  num_tests_to_log: 1
+  limit_flows: False
+  limit_hosts: 3
+  limit_qps: 3

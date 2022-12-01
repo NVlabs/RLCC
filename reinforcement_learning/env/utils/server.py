@@ -24,7 +24,7 @@ class Server:
         self.config = config
         self.port = port
         self.server_socket = self.open_server_socket(port=self.port)
-        self.server_socket.settimeout(300)
+        self.server_socket.settimeout(5)
         self.connection, self.client_address = None, None
 
     def step(self, action) -> RawFeatures:
@@ -63,6 +63,7 @@ class Server:
             )
             return features
         except socket.timeout:
+            print('socket timed-out')
             return None
 
     def send_data(self, action) -> None:
@@ -103,6 +104,6 @@ class Server:
     def open_server_socket(port: int, host: str = 'localhost') -> socket.socket:
         serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         serversocket.bind((host, port))
-        serversocket.listen(300)
+        serversocket.listen(5)
         return serversocket
 
