@@ -37,6 +37,7 @@ agent:
   discount: .99
   linear_lr_decay: False
   dqn:
+    target_update_interval: 10000
     action_weights:
       - 0.8
       - 0.95
