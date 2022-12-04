@@ -5,8 +5,8 @@ import numpy as np
 from typing import List, Tuple
 from types import SimpleNamespace
 from baselines.common.vec_env import VecEnv
-from config.config import Config
-from models.actor_critic import ActorCritic
+from ..config.config import Config
+from ..models.actor_critic import ActorCritic
 from .utils import random_sample, AsyncronousRollouts, flatten
 from .base import BaseAgent
 

@@ -5,8 +5,8 @@ from torch import nn
 from torch.nn import functional as F
 from torch import optim
 from baselines.common.vec_env import VecEnv
-from config.config import Config
-from models.mlp import MLP
+from ..config.config import Config
+from ..models.mlp import MLP
 from .utils import AsynchronousReplay, flatten
 from .base import BaseAgent
 
@@ -21,13 +21,11 @@ class DQN(BaseAgent):
         self.model = MLP(
             input_size=env.observation_space.shape[0],
             output_size=len(self.config.agent.dqn.action_weights),
-            activation_function=self.config.agent.activation_function,
             hidden_sizes=self.config.agent.dqn.architecture
         ).to(self.config.device)
         self.target_model = MLP(
             input_size=env.observation_space.shape[0],
             output_size=len(self.config.agent.dqn.action_weights),
-            activation_function=self.config.agent.activation_function,
             hidden_sizes=self.config.agent.dqn.architecture
         ).to(self.config.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.config.training.learning_rate, eps=1e-5)

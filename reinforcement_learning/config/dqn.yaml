@@ -1,12 +1,6 @@
 env:
   scenarios:
     - "4_1_m2o_l"
-    - "4_16_m2o_l"
-    - "8_1_m2o_l"
-    - "4_16_a2a_l"
-    - "8_8_a2a_l"
-    - "8_16_a2a_l"
-    - "32_1_m2o_l"
   envs_per_scenario: 1
   history_length: 2
   omnet:
@@ -25,7 +19,7 @@ training:
 agent:
   save_name: ''
   evaluate: False
-  agent_type: PPO
+  agent_type: DQN
   agent_features:
     - action
     - latency_mean_min_ratio
@@ -39,10 +33,7 @@ agent:
 #    - requested_rate
   discount: .99
   linear_lr_decay: False
-  ppo:
-    action_multiplier_dec: 0.2
-    action_multiplier_inc: 0.2
-    discrete_actions: True
+  dqn:
     action_weights:
       - 0.8
       - 0.95
@@ -50,23 +41,9 @@ agent:
       - 1.05
       - 1.1
       - 1.2
-    rollout_length: 64
-    rollouts_per_batch: 4
-    use_gae: False
-    baseline_coeff: .5
-    entropy_coeff: .01
-    gae_tau: .95
-    use_lstm: False
-    actor_architecture:
+    architecture:
       - 32
       - 16
-    critic_architecture:
-      - 32
-      - 16
-    params:
-      ppo_ratio_clip: .2
-      ppo_batch_size: 4
-      ppo_optimization_epochs: 4
 
 logging:
   wandb: false  # Logging using weights and biases
