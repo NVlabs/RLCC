@@ -5,8 +5,8 @@ from torch import nn
 from torch.nn import functional as F
 from torch import optim
 from baselines.common.vec_env import VecEnv
-from ..config.config import Config
-from ..models.mlp import MLP
+from config.config import Config
+from models.mlp import MLP
 from .utils import AsynchronousReplay, flatten
 from .base import BaseAgent
 
