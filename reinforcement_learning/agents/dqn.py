@@ -83,7 +83,7 @@ class DQN(BaseAgent):
         state, action, reward, next_state, mask = self.replay.sample(self.config.agent.dqn.batch_size)
 
         state_action_values = self.model(state)[0].gather(1, action)
-        next_state_values = self.target_model(next_state).max(1)[0].unsqueeze(-1).detach()
+        next_state_values = self.target_model(next_state)[0].max(1)[0].unsqueeze(-1).detach()
         expected_state_action_values = reward + self.config.agent.discount * next_state_values
 
         # Compute Huber loss
