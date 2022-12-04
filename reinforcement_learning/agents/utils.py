@@ -114,7 +114,7 @@ class AsynchronousReplay:
 
     @staticmethod
     def _get_key(env_info: Dict) -> str:
-        return env_info['key']
+        return env_info['agent_key']
 
     def add_state_action(self, state_info: Dict, env_info: List[Dict]) -> None:
         """
