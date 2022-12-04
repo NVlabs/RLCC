@@ -22,7 +22,6 @@ class Supervised(BaseAgent):
         self.model = MLP(
             input_size=env.observation_space.shape[0] - len(self.config.agent.agent_features),
             output_size=1,
-            activation_function=self.config.agent.activation_function,
             hidden_sizes=self.config.agent.supervised.architecture
         ).to(self.config.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.config.training.learning_rate, eps=1e-5)
