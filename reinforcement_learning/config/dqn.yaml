@@ -38,6 +38,9 @@ agent:
   linear_lr_decay: False
   dqn:
     target_update_interval: 10000
+    eps_start: 1.
+    eps_end: 0.05
+    eps_decay: 100000
     action_weights:
       - 0.8
       - 0.95
