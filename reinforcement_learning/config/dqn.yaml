@@ -9,7 +9,9 @@ env:
     config_path: omnetpp.ini
   reward: general
   port_increment: 10
-  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/train_default_config/
+  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/
+  verbose: False
+  restart_on_end: True
 
 training:
   max_timesteps: 1000000
