@@ -74,7 +74,7 @@ class DQN(BaseAgent):
             actions = self.model(state)[0].max(1)[1].view(-1, 1)
         for i in range(state.shape[0]):
             if random.random() > eps_threshold:
-                actions[i] = random.randrange(len(self.config.agent.ppo.action_weights))
+                actions[i] = random.randrange(len(self.config.agent.dqn.action_weights))
         return actions
 
     def _calculate_loss(
@@ -98,4 +98,19 @@ class DQN(BaseAgent):
         return loss.item()
 
     def act(self, state: torch.tensor) -> torch.tensor:
-        return self.model.act(state)
+        return self.model(state)[0].max(1)[1].view(-1, 1)
+
+    def test(self) -> None:
+        timesteps = 0
+
+        state, info = self.env.reset()
+
+        with torch.no_grad():
+            while True:
+                action = self.act(state)
+                state, reward, done, infos = self.env.step(self._parse_action(action))
+
+                self.log_data(timesteps, infos)
+
+                timesteps += state.shape[0]
+
