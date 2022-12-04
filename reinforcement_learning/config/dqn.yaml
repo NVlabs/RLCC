@@ -41,6 +41,7 @@ agent:
     eps_start: 1.
     eps_end: 0.05
     eps_decay: 100000
+    batch_size: 256
     action_weights:
       - 0.8
       - 0.95
