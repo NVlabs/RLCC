@@ -71,6 +71,8 @@ agent:
       ppo_optimization_epochs: 4
   adpg:
     beta: 1.5
+    target: 0.064
+    scale: 12.5
 
 logging:
   wandb: false  # Logging using weights and biases
