@@ -46,6 +46,8 @@ agent:
     architecture:
       - 32
       - 16
+  adpg:
+    beta: 1.5
 
 logging:
   wandb: false  # Logging using weights and biases
