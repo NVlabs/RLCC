@@ -1,0 +1,55 @@
+env:
+  scenarios:
+    - "4_1_m2o_l"
+    - "4_16_m2o_l"
+    - "8_1_m2o_l"
+    - "4_16_a2a_l"
+    - "8_8_a2a_l"
+    - "8_16_a2a_l"
+    - "32_1_m2o_l"
+  envs_per_scenario: 1
+  history_length: 2
+  omnet:
+    simulator_path: ../NVIDIACCSim/sim  # relative to reinforcement_learning dir 
+    exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
+    config_path: omnetpp.ini
+  reward: rtt_reward
+  port_increment: 50
+  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/
+  verbose: False
+  restart_on_end: True
+
+
+training:
+  max_num_updates: 1000
+  learning_rate: 0.01
+  gradient_clip: 0.5
+
+agent:
+  save_name: ''
+  checkpoint: ''
+  evaluate: False
+  agent_type: SUPERVISED
+  agent_features:
+    - action
+    - latency_mean_min_ratio
+    - cnp_ratio
+    - nack_ratio
+  discount: .99
+  linear_lr_decay: False
+  activation_function: relu
+  supervised:
+    batch_size: 256
+    architecture:
+      - 32
+      - 16
+
+logging:
+  wandb: false  # Logging using weights and biases
+  wandb_run_name: test  # Logging using weights and biases
+  run_id: ''
+  min_log_interval: 1024 # The minimum number of iterations before each log occurs
+  num_tests_to_log: 1
+  limit_flows: False
+  limit_hosts: 3
+  limit_qps: 3

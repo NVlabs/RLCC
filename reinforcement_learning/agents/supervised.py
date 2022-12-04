@@ -98,6 +98,20 @@ class Supervised(BaseAgent):
         return loss.item()
 
     def act(self, state: torch.tensor) -> torch.tensor:
-        action, _ = self.model.act(state)
+        action, _ = self._policy(state[:, len(self.config.agent.agent_features):])
         action = torch.tanh(action)
         return self._parse_action(action)
+
+    def test(self) -> None:
+        timesteps = 0
+
+        state, info = self.env.reset()
+
+        with torch.no_grad():
+            while True:
+                action = self.act(state)
+                state, reward, done, infos = self.env.step(self._parse_action(action))
+
+                self.log_data(timesteps, infos)
+
+                timesteps += state.shape[0]

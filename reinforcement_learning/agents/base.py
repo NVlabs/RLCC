@@ -57,7 +57,6 @@ class BaseAgent:
         filename = [f for f in file_list if self.config.agent.agent_type + checkpoint in f and '.txt' not in f]
         checkpoint_state_dict = torch.load(f'{self.save_path}' + name + '/' + filename[0])
         self.model.load_state_dict(checkpoint_state_dict['model_state_dict'])
-        
 
     def test(self):
         raise NotImplementedError
