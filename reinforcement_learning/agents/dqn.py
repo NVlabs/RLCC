@@ -71,7 +71,7 @@ class DQN(BaseAgent):
         eps_threshold = self.config.agent.dqn.eps_end + (self.config.agent.dqn.eps_start - self.config.agent.dqn.eps_end) * \
                         math.exp(-1. * timesteps / self.config.agent.dqn.eps_decay)
         with torch.no_grad():
-            actions = self.model(state).max(1)[1].view(-1, 1)
+            actions = self.model(state)[0].max(1)[1].view(-1, 1)
         for i in range(state.shape[0]):
             if random.random() > eps_threshold:
                 actions[i] = random.randrange(len(self.config.agent.ppo.action_weights))
@@ -82,7 +82,7 @@ class DQN(BaseAgent):
     ) -> float:
         state, action, reward, next_state, mask = self.replay.sample(self.config.agent.dqn.batch_size)
 
-        state_action_values = self.model(state).gather(1, action)
+        state_action_values = self.model(state)[0].gather(1, action)
         next_state_values = self.target_model(next_state).max(1)[0].unsqueeze(-1).detach()
         expected_state_action_values = reward + self.config.agent.discount * next_state_values
 
