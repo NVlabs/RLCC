@@ -17,6 +17,7 @@ training:
   max_timesteps: 1000000
   learning_rate: 0.00025
   gradient_clip: .5
+  replay_size: 10000
 
 agent:
   save_name: ''
