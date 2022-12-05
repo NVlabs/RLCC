@@ -56,9 +56,9 @@ It is possible to train/test on multiple scenarios at the same time.
 Model training is done by running the script: `reinforcement_learning/run.py`.
 To train the model run the following line (notice it would train the model on 3 scenarios: 2 hosts 1 qp per host many-to-one, 16 hosts 8 qps per host many-to-one, 4 hosts 4 qps per host all-to-all). all of the parameterss bellow can be changes
 
-    ```
-    python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>   --agent ADPG --scenarios 2_1_m2o_l 16_8_m2o_l 4_4_a2a_l --save_name <model_name> --port_increment 0 --config rlcc_evaluate
-    ```
+```
+python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>   --agent ADPG --scenarios 2_1_m2o_l 16_8_m2o_l 4_4_a2a_l --save_name <model_name> --port_increment 0 --config rlcc_evaluate
+```
 
 ### Test
 Testing the model is similar to training the model and is done by running the script:  `reinforcement_learning/run.py` and settings the parameter `evaluate: True` in the yaml file or adding `--evaluate` in the command line. 
@@ -66,8 +66,6 @@ Testing the model is similar to training the model and is done by running the sc
 Example for test scenario: 64 hosts 128 QPs per host many-to-one short simulation.
 ```
 python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>  --learning_rate 0.01 --history_length 2 --agent ADPG --scenarios 64_128_m2o_s --save_name <model_name> --port_increment 0 --config rlcc_evaluate --agent_features action rtt_reward --evaluate
-
-
 ```
 
 ### Simulator Results
@@ -85,11 +83,10 @@ python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wa
 * **Training is typically done on very long simulations and is monitored through wandb/tensorboard and not via the .sca files**
 * At test time, sca files are automatically parsed to output key summary statistics to a .csv file.
 
-       
-        <!-- Vector files takes a lot of memory space (~7GB per file).
 
-        To define if the run will have vectors file output or not we use the configuration set in the relevant ccsim.ini file (located in ./simulator/sim/ccsim.ini). For example to run our algo without vectors we will config the run to be Config RL_ShortSimult_ManyToOne and with vectors we will define the run to be Config  RL_ShortSimult_ManyToOne_Vectors. While runing the code from python we will config the run using the relevant configuration file located in ./config -->
+<!-- Vector files takes a lot of memory space (~7GB per file).
 
+To define if the run will have vectors file output or not we use the configuration set in the relevant ccsim.ini file (located in ./simulator/sim/ccsim.ini). For example to run our algo without vectors we will config the run to be Config RL_ShortSimult_ManyToOne and with vectors we will define the run to be Config  RL_ShortSimult_ManyToOne_Vectors. While runing the code from python we will config the run using the relevant configuration file located in ./config -->
 
 # TO DOs
 * Write advanced simulator usage (vector files, explain .ini file (or maybe we shouldn't))
