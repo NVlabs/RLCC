@@ -14,7 +14,16 @@ This repository conatins the source code and simulator used to train RL-CC.
 
     **It is strongly recommended to not modify any of the configurations!**
  
-## How to run RL-CC
+## Installation
+
+### Prerequisites
+RL-CC requires Python 3.7+.  
+### Installing using pip
+install RL-CC:  
+```pip install -r requirements.txt```
+
+## Configuration
+### Running RL-CC
 Running RL-CC is done through the command-line
 ```
 cd reinforcement_learning/
@@ -52,7 +61,7 @@ Usage examples:
 It is possible to train/test on multiple scenarios at the same time.
 
 
-### Train
+## Training
 Model training is done by running the script: `reinforcement_learning/run.py`.
 To train the model run the following line (notice it would train the model on 3 scenarios: 2 hosts 1 qp per host many-to-one, 16 hosts 8 qps per host many-to-one, 4 hosts 4 qps per host all-to-all). all of the parameterss bellow can be changes
 
@@ -60,7 +69,7 @@ To train the model run the following line (notice it would train the model on 3 
 python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>   --agent ADPG --scenarios 2_1_m2o_l 16_8_m2o_l 4_4_a2a_l --save_name <model_name> --port_increment 0 --config rlcc_evaluate
 ```
 
-### Test
+## Test and visualizing results
 Testing the model is similar to training the model and is done by running the script:  `reinforcement_learning/run.py` and settings the parameter `evaluate: True` in the yaml file or adding `--evaluate` in the command line. 
 
 Example for test scenario: 64 hosts 128 QPs per host many-to-one short simulation.
@@ -83,11 +92,32 @@ python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wa
 * **Training is typically done on very long simulations and is monitored through wandb/tensorboard and not via the .sca files**
 * At test time, sca files are automatically parsed to output key summary statistics to a .csv file.
 
+## Citing the repository
+To cite this repository:  
+```
+@misc{https://doi.org/10.48550/arxiv.2102.09337,
+  doi = {10.48550/ARXIV.2102.09337},
+  url = {https://arxiv.org/abs/2102.09337},
+  author = {Tessler, Chen and Shpigelman, Yuval and Dalal, Gal and Mandelbaum, Amit and Kazakov, Doron Haritan and Fuhrer, Benjamin and Chechik, Gal and Mannor, Shie},
+  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Networking and Internet Architecture (cs.NI), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  title = {Reinforcement Learning for Datacenter Congestion Control},
+  publisher = {arXiv},
+  year = {2021},
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+```
+## Reference Paper
+
+Tessler, C., Shpigelman, Y., Dalal, G., Mandelbaum, A., Kazakov, D. H., Fuhrer, B., Chechik, G., & Mannor, S. (2021). Reinforcement Learning for Datacenter Congestion Control. http://arxiv.org/abs/2102.09337. arXiv:2102.09337.
+
+Fuhrer, B., Shpigelman, Y., Tessler, C., Mannor, S., Chechik, G., Zahavi, E., Dalal, G. (2022). Implementing Reinforcement Learning Datacenter Congestion Control in NVIDIA NIC. https://arxiv.org/abs/2207.02295. 	arXiv:2207.02295.
+
 
 <!-- Vector files takes a lot of memory space (~7GB per file).
 
 To define if the run will have vectors file output or not we use the configuration set in the relevant ccsim.ini file (located in ./simulator/sim/ccsim.ini). For example to run our algo without vectors we will config the run to be Config RL_ShortSimult_ManyToOne and with vectors we will define the run to be Config  RL_ShortSimult_ManyToOne_Vectors. While runing the code from python we will config the run using the relevant configuration file located in ./config -->
 
-# TO DOs
-* Write advanced simulator usage (vector files, explain .ini file (or maybe we shouldn't))
-* test and train other algos than RL-CC
+<!-- # TO DOs -->
+<!-- * Write advanced simulator usage (vector files, explain .ini file (or maybe we shouldn't)) -->
+<!-- * test and train other algos than RL-CC -->
