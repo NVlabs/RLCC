@@ -1,6 +1,6 @@
 # Reinforcement Learning for Datacenter Congestion Control
-RL-CC is an RDMA congestion control algorithm trained with the analytical deterministic policy gradient method (ADPG).  
-This repository conatins the source code and simulator used to train RL-CC.
+RL-CC is an RDMA congestion control algorithm trained with the analytical deterministic policy gradient method (ADPG) (Tessler et al. 2021) [1].  
+This repository conatins the source code and simulator used to train RL-CC for [1] and [2]. 
 
 
 ## NVIDIACCSim Simulator
@@ -107,11 +107,10 @@ To cite this repository:
 }
 
 ```
-## Reference Paper
+## Reference Papers
+[1] Tessler, C., Shpigelman, Y., Dalal, G., Mandelbaum, A., Kazakov, D. H., Fuhrer, B., Chechik, G., & Mannor, S. (2021). Reinforcement Learning for Datacenter Congestion Control. http://arxiv.org/abs/2102.09337. arXiv:2102.09337.  
 
-Tessler, C., Shpigelman, Y., Dalal, G., Mandelbaum, A., Kazakov, D. H., Fuhrer, B., Chechik, G., & Mannor, S. (2021). Reinforcement Learning for Datacenter Congestion Control. http://arxiv.org/abs/2102.09337. arXiv:2102.09337.
-
-Fuhrer, B., Shpigelman, Y., Tessler, C., Mannor, S., Chechik, G., Zahavi, E., Dalal, G. (2022). Implementing Reinforcement Learning Datacenter Congestion Control in NVIDIA NIC. https://arxiv.org/abs/2207.02295. 	arXiv:2207.02295.
+[2] Fuhrer, B., Shpigelman, Y., Tessler, C., Mannor, S., Chechik, G., Zahavi, E., Dalal, G. (2022). Implementing Reinforcement Learning Datacenter Congestion Control in NVIDIA NIC. https://arxiv.org/abs/2207.02295. 	arXiv:2207.02295.
 
 
 <!-- Vector files takes a lot of memory space (~7GB per file).
