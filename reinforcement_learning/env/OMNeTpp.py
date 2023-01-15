@@ -4,13 +4,16 @@ import time
 from typing import Dict, Tuple
 
 import gym
+
+gym.logger.set_level(40)
 import numpy as np
 from config.config import Config
 from config.constants import py_to_c_scenarios
-from .utils.feature_history import FeatureHistory
-from .utils.server import Server
+
 from .utils import DEFAULT_PORT
+from .utils.feature_history import FeatureHistory
 from .utils.parse_results import parse_results
+from .utils.server import Server
 
 scenario_types = {"l": 'LongSimult', 'm': 'MediumSimult', 's': 'ShortSimult'}
 

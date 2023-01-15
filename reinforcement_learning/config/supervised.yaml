@@ -18,6 +18,7 @@ env:
   save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/
   verbose: False
   restart_on_end: True
+  multiprocess: False
 
 
 training:

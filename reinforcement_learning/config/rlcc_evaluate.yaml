@@ -1,15 +1,16 @@
 env:
   scenarios:
-    - "2_1_m2o_s"
+    - "64_128_m2o_s"
   envs_per_scenario: 1
   port_increment: 10
   save_path: 'output/'  # relative path to reinforcement learning
   verbose: True
   restart_on_end: End
+  multiprocess: True
 
 agent:
-  save_name: ''
-  checkpoint: ''
+  save_name: 'debug_2'
+  checkpoint: '2048'
   evaluate: True
 
 logging:

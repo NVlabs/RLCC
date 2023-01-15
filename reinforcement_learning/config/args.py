@@ -22,6 +22,7 @@ def parse_args():
     parser.add_argument('--log_data', action='store_true')
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--restart_on_end', action='store_true')
+    parser.add_argument('--multiprocess', action='store_true', default=-1)
 
     parser.add_argument('--action_multiplier_dec', default=-1, type=float)
     parser.add_argument('--action_multiplier_inc', default=-1, type=float)

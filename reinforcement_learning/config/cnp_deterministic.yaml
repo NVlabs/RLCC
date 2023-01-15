@@ -12,6 +12,7 @@ env:
   reward: constrained
   default_port: 5555
   port_increment: 0
+  multiprocess: False
 
 training:
   max_timesteps: 1000000

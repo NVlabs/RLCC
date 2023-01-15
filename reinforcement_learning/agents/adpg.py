@@ -175,6 +175,7 @@ class ADPG(BaseAgent):
                     self.config.logging.wandb.log({"Loss": reward_loss + action_loss, "reward_loss": reward_loss, "action_loss": action_loss, "num_updates": num_updates}, step=timesteps)
                     for key in scenario_loss.keys():
                         self.config.logging.wandb.log({f"Loss_scenario_{key}": scenario_loss[key]}, step=timesteps)
+                print(f"Loss: {(reward_loss + action_loss):5f}")
                 num_updates += 1
 
                 self.save_model(checkpoint=timesteps)
