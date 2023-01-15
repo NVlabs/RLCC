@@ -1,5 +1,5 @@
 import torch
-from baselines.common.vec_env import VecEnv
+from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 from config.config import Config
 from .base import BaseAgent
 

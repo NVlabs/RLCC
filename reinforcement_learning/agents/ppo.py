@@ -4,7 +4,7 @@ from torch import nn
 import numpy as np
 from typing import List, Tuple
 from types import SimpleNamespace
-from baselines.common.vec_env import VecEnv
+from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 from config.config import Config
 from models.actor_critic import ActorCritic
 from .utils import random_sample, AsyncronousRollouts, flatten

@@ -2,7 +2,7 @@ from collections import defaultdict
 import os
 import torch
 import numpy as np
-from baselines.common.vec_env import VecEnv
+from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 from config.config import Config
 from collections import defaultdict
 import pickle

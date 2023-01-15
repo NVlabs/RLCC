@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 from torch import nn
 from torch import optim
-from baselines.common.vec_env import VecEnv
+from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 from typing import List, Tuple
 from config.config import Config
 from .utils import flatten

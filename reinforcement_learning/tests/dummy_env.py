@@ -1,6 +1,6 @@
 import gym
 import numpy as np
-from baselines.common.vec_env import VecEnv
+from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 from config.config import Config
 from env.utils.env_utils import VecPyTorch, DummyVecEnvWithResetInfo, SubprocVecEnvWithResetInfo
 
