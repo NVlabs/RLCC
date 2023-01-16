@@ -95,7 +95,9 @@ python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wa
 ## Citing the repository
 ```
 @article{10.1145/3512798.3512815,
-author = {Tessler, Chen and Shpigelman, Yuval and Dalal, Gal and Mandelbaum, Amit and Haritan Kazakov, Doron and Fuhrer, Benjamin and Chechik, Gal and Mannor, Shie},
+author = {Tessler, Chen and Shpigelman, Yuval and Dalal, Gal  
+and Mandelbaum, Amit and Haritan Kazakov, Doron and Fuhrer, Benjamin   
+and Chechik, Gal and Mannor, Shie},
 title = {Reinforcement Learning for Datacenter Congestion Control},
 year = {2022},
 issue_date = {September 2021},
@@ -111,9 +113,6 @@ month = {jan},
 pages = {43–46},
 numpages = {4}
 }
-
-
-
 ```
 ## Reference Papers
 [1] Tessler, C., Shpigelman, Y., Dalal, G., Mandelbaum, A., Kazakov, D. H., Fuhrer, B., Chechik, G., & Mannor, S. (2021). Reinforcement Learning for Datacenter Congestion Control. http://arxiv.org/abs/2102.09337. arXiv:2102.09337.  
