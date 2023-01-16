@@ -93,18 +93,26 @@ python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wa
 * At test time, sca files are automatically parsed to output key summary statistics to a .csv file.
 
 ## Citing the repository
-To cite this repository:  
 ```
-@misc{https://doi.org/10.48550/arxiv.2102.09337,
-  doi = {10.48550/ARXIV.2102.09337},
-  url = {https://arxiv.org/abs/2102.09337},
-  author = {Tessler, Chen and Shpigelman, Yuval and Dalal, Gal and Mandelbaum, Amit and Kazakov, Doron Haritan and Fuhrer, Benjamin and Chechik, Gal and Mannor, Shie},
-  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Networking and Internet Architecture (cs.NI), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  title = {Reinforcement Learning for Datacenter Congestion Control},
-  publisher = {arXiv},
-  year = {2021},
-  copyright = {arXiv.org perpetual, non-exclusive license}
+@article{10.1145/3512798.3512815,
+author = {Tessler, Chen and Shpigelman, Yuval and Dalal, Gal and Mandelbaum, Amit and Haritan Kazakov, Doron and Fuhrer, Benjamin and Chechik, Gal and Mannor, Shie},
+title = {Reinforcement Learning for Datacenter Congestion Control},
+year = {2022},
+issue_date = {September 2021},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {49},
+number = {2},
+issn = {0163-5999},
+url = {https://doi.org/10.1145/3512798.3512815},
+doi = {10.1145/3512798.3512815},
+journal = {SIGMETRICS Perform. Eval. Rev.},
+month = {jan},
+pages = {43–46},
+numpages = {4}
 }
+
+
 
 ```
 ## Reference Papers
