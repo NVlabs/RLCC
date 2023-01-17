@@ -12,7 +12,7 @@ This repository conatins the source code and simulator used to train RL-CC for [
     - all-to-all
     - long-short
 
-    **It is strongly recommended to not modify any of the configurations!**
+    **it is advised to modify the configurations only if you are familiar with the omnest simulator!**
  
 ## Installation
 
