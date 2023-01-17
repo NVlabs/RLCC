@@ -27,6 +27,8 @@ from models.mlp import MLP
 
 import random
 
+WARM_UP_PRINT = {True: 'warm-up stage', False: 'second stage'}
+
 
 class ADPG(BaseAgent):
     def __init__(self, config: Config, env: VecEnv):
@@ -110,13 +112,16 @@ class ADPG(BaseAgent):
         self.rollout = {}
         
         rollout_counter = {}
-
+        print(20*'-')
         print(f'Initiating training')
+        print(20*'-')
 
         warmup_updates = self.config.agent.adpg.warmup_updates
         warmup_length = self.config.agent.adpg.warmup_length
 
-        print(f'Update policy after a minimum of : {self.config.agent.adpg.rollout_length} steps per flow after a warmup of: {warmup_updates} updates of {warmup_length} total steps')
+        print(f"Two stage policy update:\n1) warmup stage {warmup_updates} after {warmup_length} steps per env")
+        print(f"2) second stage: policy update after a minimum of {self.config.agent.adpg.rollout_length} steps per agent")
+
         while num_updates <= self.config.training.max_num_updates:
             # Perform a rollout
             min_counter = 0
@@ -164,8 +169,7 @@ class ADPG(BaseAgent):
                         break
 
             agent_steps = [len(self.rollout[agent_key]['reward']) for agent_key in self.rollout.keys() if len(self.rollout[agent_key]['reward']) > 0]
-            print(f"Policy Update: {num_updates}/{self.config.training.max_num_updates} after {timesteps} total timesteps \nPer agent inner-batch step statistics: min {min(agent_steps)} max {max(agent_steps)} mean: {np.mean(agent_steps)} std: {np.std(agent_steps)}")
-
+            
             loss_stats = self._calculate_loss()
 
             if loss_stats is not None:
@@ -175,7 +179,9 @@ class ADPG(BaseAgent):
                     self.config.logging.wandb.log({"Loss": reward_loss + action_loss, "reward_loss": reward_loss, "action_loss": action_loss, "num_updates": num_updates}, step=timesteps)
                     for key in scenario_loss.keys():
                         self.config.logging.wandb.log({f"Loss_scenario_{key}": scenario_loss[key]}, step=timesteps)
-                print(f"Loss: {(reward_loss + action_loss):5f}")
+                print(f"Policy Update {num_updates}/{self.config.training.max_num_updates} {WARM_UP_PRINT[is_warmup]}: after {timesteps} total timesteps \nLoss: {(reward_loss + action_loss):.3f} calculated over {num_agents} agents")
+                print(f"Number of steps per agent statistics: min {min(agent_steps)} max {max(agent_steps)} mean: {np.mean(agent_steps)} std: {np.std(agent_steps)}")
+                print(20*'-')
                 num_updates += 1
 
                 self.save_model(checkpoint=timesteps)
