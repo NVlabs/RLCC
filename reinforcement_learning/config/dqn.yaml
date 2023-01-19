@@ -1,10 +1,16 @@
 env:
   scenarios:
     - "4_1_m2o_l"
+    - "4_16_m2o_l"
+    - "8_1_m2o_l"
+    - "4_16_a2a_l"
+    - "8_8_a2a_l"
+    - "8_16_a2a_l"
+    - "32_1_m2o_l"
   envs_per_scenario: 1
   history_length: 2
   omnet:
-    simulator_path: ../NVIDIACCSim/sim  # relative to reinforcement_learning dir
+    simulator_path: ../nv_ccsim/sim  # relative to reinforcement_learning dir
     exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
     config_path: omnetpp.ini
   reward: general
@@ -15,7 +21,7 @@ env:
   multiprocess: False
 
 training:
-  max_timesteps: 1000000
+  max_num_updates: 1000
   learning_rate: 0.00025
   gradient_clip: .5
   replay_size: 10000
@@ -26,15 +32,11 @@ agent:
   agent_type: DQN
   agent_features:
     - action
-    - latency_mean_min_ratio
-#    - bandwidth
     - cnp_ratio
-#    - normalized_remaining_switch_rate
-#    - nack_indicator
-#    - rtt_rate_signal
     - nack_ratio
-#    - latency_inflation
-#    - requested_rate
+#    - bandwidth
+#    - rtt_inflation
+#    - cur_rate
   discount: .99
   linear_lr_decay: False
   dqn:
@@ -43,6 +45,9 @@ agent:
     eps_end: 0.05
     eps_decay: 100000
     batch_size: 256
+    activation_function: relu
+    bias: false
+    use_rnn: null
     action_weights:
       - 0.8
       - 0.95

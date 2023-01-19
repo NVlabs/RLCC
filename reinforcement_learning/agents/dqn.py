@@ -18,27 +18,35 @@ class DQN(BaseAgent):
     """
     def __init__(self, config: Config, env: VecEnv):
         BaseAgent.__init__(self, config, env)
+        
         self.model = MLP(
             input_size=env.observation_space.shape[0],
             output_size=len(self.config.agent.dqn.action_weights),
-            hidden_sizes=self.config.agent.dqn.architecture
+            hidden_sizes=self.config.agent.dqn.architecture,
+            activation=self.config.agent.dqn.activation_function,
+            bias=self.config.agent.dqn.bias,
+            use_rnn=self.config.agent.dqn.use_rnn
         ).to(self.config.device)
         self.target_model = MLP(
             input_size=env.observation_space.shape[0],
             output_size=len(self.config.agent.dqn.action_weights),
-            hidden_sizes=self.config.agent.dqn.architecture
+            hidden_sizes=self.config.agent.dqn.architecture,
+            activation=self.config.agent.dqn.activation_function,
+            bias=self.config.agent.dqn.bias,
+            use_rnn=self.config.agent.dqn.use_rnn
         ).to(self.config.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.config.training.learning_rate, eps=1e-5)
         self.replay = AsynchronousReplay(config=self.config)
 
     def train(self) -> None:
         timesteps = 0
+        num_updates = 0
 
         assert self.config.agent.dqn.target_update_interval % (len(self.config.env.scenarios) * self.config.env.envs_per_scenario) == 0
 
         state, info = self.env.reset()
 
-        while timesteps < self.config.training.max_timesteps:
+        while num_updates < self.config.training.max_num_updates:
             action = self._epsilon_greedy(state, timesteps)
             self.replay.add_state_action(dict(state=state, action=action), info)
 
@@ -47,10 +55,13 @@ class DQN(BaseAgent):
 
             self.log_data(timesteps, infos)
 
-            timesteps += state.shape[0]
+            timesteps += 1
 
             if len(self.replay.replay) >= self.config.agent.dqn.batch_size:
                 loss = self._calculate_loss()
+                print(f"Policy Update {num_updates}/{self.config.training.max_num_updates}: after {timesteps} total timesteps. Loss: {(loss):.5f}")
+                print(20*'-')
+                num_updates += 1
 
                 if self.config.logging.wandb is not None:
                     self.config.logging.wandb.log(

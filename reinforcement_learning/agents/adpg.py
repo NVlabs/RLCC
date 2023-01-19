@@ -8,7 +8,6 @@ Action should be an optimization task maximizing the value but minimizing the CN
 The optimization can look over the entire rollout and optimize for some statistic or on a per-state.
 """
 
-import numpy as np
 import torch
 import os
 
@@ -167,20 +166,17 @@ class ADPG(BaseAgent):
                     if warmup_step > self.config.agent.adpg.max_step_size:
                         print(f"break steps : {warmup_step}>{self.config.agent.adpg.max_step_size}")
                         break
-
-            agent_steps = [len(self.rollout[agent_key]['reward']) for agent_key in self.rollout.keys() if len(self.rollout[agent_key]['reward']) > 0]
             
             loss_stats = self._calculate_loss()
 
             if loss_stats is not None:
-                reward_loss, action_loss, scenario_loss, num_agents = loss_stats
+                reward_loss, action_loss, scenario_loss = loss_stats
                 self.rollout = {}
                 if self.config.logging.wandb is not None:
                     self.config.logging.wandb.log({"Loss": reward_loss + action_loss, "reward_loss": reward_loss, "action_loss": action_loss, "num_updates": num_updates}, step=timesteps)
                     for key in scenario_loss.keys():
                         self.config.logging.wandb.log({f"Loss_scenario_{key}": scenario_loss[key]}, step=timesteps)
-                print(f"Policy Update {num_updates}/{self.config.training.max_num_updates} {WARM_UP_PRINT[is_warmup]}: after {timesteps} total timesteps \nLoss: {(reward_loss + action_loss):.3f} calculated over {num_agents} agents")
-                print(f"Number of steps per agent statistics: min {min(agent_steps)} max {max(agent_steps)} mean: {np.mean(agent_steps)} std: {np.std(agent_steps)}")
+                print(f"Policy Update {num_updates}/{self.config.training.max_num_updates} {WARM_UP_PRINT[is_warmup]}: after {timesteps} total timesteps. Loss: {(reward_loss + action_loss):.5f}")
                 print(20*'-')
                 num_updates += 1
 
@@ -307,4 +303,4 @@ class ADPG(BaseAgent):
         for key in scenario_loss_agents.keys():
             scenario_loss[key] = scenario_loss[key] / num_agents
 
-        return total_reward_loss, total_action_loss, scenario_loss, num_agents
+        return total_reward_loss, total_action_loss, scenario_loss

@@ -5,14 +5,18 @@ from typing import List, Tuple
 from .model_utils import init
 
 RNN_TO_MODEL = {'LSTM': nn.LSTMCell, 'GRU': nn.GRUCell, 'RNN': nn.RNNCell}
-
+ACTIVATION = {'relu': nn.ReLU, 'tanh': nn.Tanh}
 
 class MLP(nn.Module):
-    def __init__(self, input_size: int, output_size: int,  hidden_sizes: List[int], use_rnn: str=None, bias=False,
-     device: torch.device=torch.device('cpu')):
+    def __init__(self, input_size: int, output_size: int,  hidden_sizes: List[int],
+                 activation: str='relu', use_rnn: str=None, bias=False,
+                 device: torch.device=torch.device('cpu')):
         super(MLP, self).__init__()
-        self.hidden_sizes = hidden_sizes
+        assert activation in ['relu', 'tanh'], "activation_function must be one of ['relu', 'tanh']"
+        assert isinstance(hidden_sizes, list), "hidden_sizes must be a list containing positive integers"
+        assert len(hidden_sizes) > 0 , "hidden_sizes cannot be an empty list"
 
+        self.hidden_sizes = hidden_sizes
         self.bias = bias
         self.device = device
 
@@ -22,13 +26,11 @@ class MLP(nn.Module):
         previous_dim = input_size
         for dim in hidden_sizes:
             layers.append(init_(nn.Linear(previous_dim, dim, bias=bias)))
-            activation = nn.ReLU()
-            layers.append(activation)
+            layers.append(ACTIVATION[activation]())
             previous_dim = dim
 
         self.rnn = None
         if use_rnn:
-            # we want the bias to be learned only for the input
             self.rnn = RNN_TO_MODEL[use_rnn](previous_dim, previous_dim, bias=bias)
         self.rnn_type = use_rnn
 

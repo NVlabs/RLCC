@@ -94,7 +94,7 @@ class OMNeTpp(gym.Env):
         """
             To initialize the simulator, we need to ensure that several environment variables are set.
         """
-        if 'NVIDIACCSim/sim' not in os.getcwd():
+        if 'nv_ccsim/sim' not in os.getcwd():
             os.chdir(self.config.env.omnet.simulator_path)
             os.environ['LD_LIBRARY_PATH'] = '../lib:../lib/python_2.7.11/lib/'
             os.environ['NEDPATH'] = '../ned/algo/:../ned/prog_cc:../ned/dctg/'

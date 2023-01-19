@@ -10,12 +10,12 @@ env:
   envs_per_scenario: 1
   history_length: 2
   omnet:
-    simulator_path: ../NVIDIACCSim/sim  # relative to reinforcement_learning dir 
+    simulator_path: ../nv_ccsim/sim  # relative to reinforcement_learning dir 
     exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
     config_path: omnetpp.ini
-  reward: rtt_reward
+  reward: adpg_reward
   port_increment: 50
-  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/
+  save_path: '../../reinforcement_learning/output/'  # relative path to nv_ccsim/sim/
   verbose: False
   restart_on_end: True
   multiprocess: False
@@ -25,6 +25,7 @@ training:
   max_num_updates: 1000
   learning_rate: 0.01
   gradient_clip: 0.5
+  replay_size: 10000
 
 agent:
   save_name: ''
@@ -33,14 +34,18 @@ agent:
   agent_type: SUPERVISED
   agent_features:
     - action
-    - latency_mean_min_ratio
     - cnp_ratio
     - nack_ratio
+    - rtt_inflation
   discount: .99
   linear_lr_decay: False
-  activation_function: relu
   supervised:
     batch_size: 256
+    activation_function: relu
+    action_multiplier_dec: 0.2
+    action_multiplier_inc: 0.2
+    bias: false
+    use_rnn: null
     architecture:
       - 32
       - 16

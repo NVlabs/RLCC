@@ -15,7 +15,10 @@ class Actor(nn.Module):
         self.net = MLP(
             input_size=observation_space.shape[0],
             output_size=self.config.agent.ppo.actor_architecture[-1],
-            hidden_sizes=self.config.agent.ppo.actor_architecture
+            hidden_sizes=self.config.agent.ppo.actor_architecture,
+            activation=self.config.agent.ppo.activation_function,
+            use_rnn=self.config.agent.ppo.use_rnn,
+            bias=self.config.agent.ppo.bias,
         )
 
         if self.config.agent.ppo.discrete_actions:
@@ -33,11 +36,13 @@ class Critic(nn.Module):
     def __init__(self, observation_space: spaces.Box, config: Config):
         super(Critic, self).__init__()
         self.config = config
-
         self.net = MLP(
             input_size=observation_space.shape[0],
             output_size=1,
-            hidden_sizes=self.config.agent.ppo.critic_architecture
+            hidden_sizes=self.config.agent.ppo.critic_architecture,
+            activation=self.config.agent.ppo.activation_function,
+            use_rnn=self.config.agent.ppo.use_rnn,
+            bias=self.config.agent.ppo.bias,
         )
 
     def forward(self, x: torch.tensor) -> torch.tensor:

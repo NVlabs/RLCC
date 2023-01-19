@@ -31,12 +31,10 @@ def make_vec_env(config: Config) -> VecEnv:
             envs.append(make_env(scenario, i, j, config))
             i += 1
 
-    if config.env.multiprocess:
+    if config.env.multiprocess and num_envs > 1 :
         print("running environments on multiple processors")
-    envs = SubprocVecEnv(envs) if config.env.multiprocess else DummyVecEnvWithResetInfo(envs)
+    envs = SubprocVecEnv(envs) if config.env.multiprocess and num_envs > 1 else DummyVecEnvWithResetInfo(envs)
     envs = VecPyTorch(envs, device=config.device)
-    
-
     return envs
 
 

@@ -10,12 +10,12 @@ ProcessedFeatures = namedtuple(
     [
         'nack_ratio', 'cnp_ratio', 'bandwidth',
         'rtt_inflation', 'cur_rate', 'action',
-        'rtt_reward', 'bytes_sent',
+        'adpg_reward', 'bytes_sent',
     ]
 )
 
 
-def calc_rtt_reward(config, rtt_inflation, rate):
+def calc_adpg_reward(config, rtt_inflation, rate):
     """
         Calculates RTT reward function (rtt_inflation * sqrt(rate))
         reward function needs to be equal to target
@@ -101,7 +101,7 @@ class FeatureHistory:
             rtt_inflation=raw_features.rtt_packet_delay,
             cur_rate=raw_features.cur_rate,
             action=self._get_action(raw_features.host, raw_features.flow_tag),
-            rtt_reward=calc_rtt_reward(self.config, raw_features.rtt_packet_delay, raw_features.cur_rate),
+            adpg_reward=calc_adpg_reward(self.config, raw_features.rtt_packet_delay, raw_features.cur_rate),
         )
 
     def process_observation(self, host: str, flow_tag: str) -> Tuple[np.ndarray, Dict, ProcessedFeatures]:
@@ -126,7 +126,7 @@ class FeatureHistory:
             nack_ratio=self.state_history_dict[agent_key][-1].nack_ratio,
             cnp_ratio=self.state_history_dict[agent_key][-1].cnp_ratio,
             rate=self.state_history_dict[agent_key][-1].cur_rate,
-            rtt_reward=self.state_history_dict[agent_key][-1].rtt_reward,
+            adpg_reward=self.state_history_dict[agent_key][-1].adpg_reward,
             rtt_inflation=self.state_history_dict[agent_key][-1].rtt_inflation,
             bandwidth=self.state_history_dict[agent_key][-1].bandwidth,
             action=self.state_history_dict[agent_key][-1].action,

@@ -41,8 +41,9 @@ class PPO(BaseAgent):
         state, info = self.env.reset()
         reward = done = torch.tensor([0. for _ in range(state.shape[0])])
         policy_loss = v_loss = entropy_loss = -1
+        num_updates = 0
 
-        while timesteps < self.config.training.max_timesteps:
+        while num_updates < self.config.training.max_num_updates:
             rollouts = []
             final_states = []
             while len(rollouts) < self.config.agent.ppo.rollouts_per_batch:
@@ -59,12 +60,14 @@ class PPO(BaseAgent):
 
                 self.log_data(timesteps, infos)
 
-                timesteps += state.shape[0]
+                timesteps += 1
 
+            num_updates += 1
             states, actions, log_probs, returns, advantages = self._process_data(rollouts, final_states)
 
             policy_loss, v_loss, entropy_loss = self._calculate_loss(states, actions, log_probs, returns, advantages)
-
+            print(f"Policy Update {num_updates}/{self.config.training.max_num_updates}: after {timesteps} total timesteps.\nPolicy loss: {policy_loss:.5f} Value loss: {v_loss:.5f} Entropy loss: {entropy_loss:.5f}")
+            print(20*'-')
             if self.config.logging.wandb is not None:
                 self.config.logging.wandb.log(
                     {"Policy loss": policy_loss, "Value loss": v_loss, "Entropy loss": entropy_loss},

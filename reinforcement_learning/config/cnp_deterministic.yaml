@@ -6,7 +6,7 @@ env:
   omnet:
     recv_len: 15  # number of features received from the OMNeT simulator
     size_of_data: 4  # size of float or uint32_t
-    simulator_path: ../simulator  # relative to reinforcement_learning dir
+    simulator_path: ../nv_ccsim/sim  # relative to reinforcement_learning dir
     exe_path: ../bin/ccsim_release  # relative to run_path
     config_path: ccsim.ini # relative to run_path
   reward: constrained
@@ -27,17 +27,10 @@ agent:
   agent_features:
     - action
     - cnp_ratio
-#    - relative_buffer_utilization
-#    - switch_rate
-#    - latency_mean_min_ratio
-#    - bandwidth
-#    - nack_indicator
-#    - rtt_rate_signal
-#    - nack_ratio
-#    - latency_inflation
-#    - requested_rate
   linear_lr_decay: False
   activation_function: relu
+  bias: false
+  use_rnn: null
   adpg:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2
@@ -45,7 +38,6 @@ agent:
     architecture:
       - 32
       - 16
-    use_lstm: True
     constraint: cnp
 
 logging:

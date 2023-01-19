@@ -22,17 +22,20 @@ class Supervised(BaseAgent):
         self.model = MLP(
             input_size=env.observation_space.shape[0] - len(self.config.agent.agent_features),
             output_size=1,
-            hidden_sizes=self.config.agent.supervised.architecture
+            hidden_sizes=self.config.agent.supervised.architecture,
+            activation=self.config.agent.supervised.activation_function,
+            bias=self.config.agent.supervised.bias,
+            use_rnn=self.config.agent.supervised.use_rnn
         ).to(self.config.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.config.training.learning_rate, eps=1e-5)
         self.replay = Replay(config=self.config)
 
     def train(self) -> None:
         timesteps = 0
-
+        num_updates = 0
         state, info = self.env.reset()
 
-        while timesteps < self.config.training.max_timesteps:
+        while num_updates < self.config.training.max_num_updates:
             action = self._policy(state[:, len(self.config.agent.agent_features):])
             state, _, done, info = self.env.step(self._parse_action(action))
             self.replay.add((state,))
@@ -43,10 +46,13 @@ class Supervised(BaseAgent):
                         if key not in ['agent_key']:
                             self.config.logging.wandb.log({env_info['agent_key'] + '/' + key: value}, step=timesteps)
 
-            timesteps += state.shape[0]
+            timesteps += 1
 
             if len(self.replay.replay) >= self.config.agent.supervised.batch_size:
                 loss = self._calculate_loss()
+                print(f"Policy Update {num_updates}/{self.config.training.max_num_updates}: after {timesteps} total timesteps. Loss: {(loss):.5f}")
+                print(20*'-')
+                num_updates += 1
 
                 if self.config.logging.wandb is not None:
                     self.config.logging.wandb.log({"Loss": loss}, step=timesteps)
@@ -64,12 +70,12 @@ class Supervised(BaseAgent):
     def _calculate_supervised_actions(self, state: torch.tensor) -> torch.tensor:
         actions = []
         for i in range(state.shape[0]):
-            if state[i][self.config.agent.agent_features.index('nack_indicator')] > 0:
+            if state[i][self.config.agent.agent_features.index('nack_ratio')] > 0:
                 actions.append(-1)
             elif state[i][self.config.agent.agent_features.index('cnp_ratio')] > 0:
                 actions.append(-1 * min(state[i][self.config.agent.agent_features.index('cnp_ratio')] * 0.01, 1.))
             else:
-                actions.append(max(1 - state[i][self.config.agent.agent_features.index('latency_mean_min_ratio')] * 0.01, -1))
+                actions.append(max(1 - state[i][self.config.agent.agent_features.index('rtt_inflation')] * 0.01, -1))
         return torch.tensor(actions, dtype=torch.float32, device=self.config.device).unsqueeze(-1)
 
     def _policy(self, state: torch.tensor) -> torch.tensor:

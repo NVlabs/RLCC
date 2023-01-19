@@ -6,19 +6,19 @@ env:
     - "4_16_a2a_l"
     - "8_8_a2a_l"
     - "8_16_a2a_l"
-    # - "64_128_m2o_l"
+    - "64_128_m2o_l"
   envs_per_scenario: 1
   history_length: 2
   omnet:
-    simulator_path: ../NVIDIACCSim/sim  # relative to reinforcement_learning dir 
+    simulator_path: ../nv_ccsim/sim  # relative to reinforcement_learning dir 
     exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
     config_path: omnetpp.ini
-  reward: rtt_reward
+  reward: adpg_reward
   port_increment: 50
-  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/
+  save_path: '../../reinforcement_learning/output/'  # relative path to nv_ccsim/sim/
   verbose: False
   restart_on_end: True
-  multiprocess: True
+  multiprocess: False
 
 
 training:
