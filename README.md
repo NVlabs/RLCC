@@ -12,9 +12,7 @@ install RL-CC:
 
 **Note: the congestion control simulator nv_ccsim is pre-complied for linux (only) and does not require installation.**
 
---------------------------------------------------
 ## NVIDIA ConnectX-6Dx CC Simulation
---------------------------------------------------
 
 * CCsim simulator enables Congestion Control algorithm development.
 * The simulator is based on the omnest 4.6 simulator.
@@ -107,9 +105,8 @@ python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wa
 * Run results can be found at: `nv_ccsim/sim/results`.
 * **Training is typically done on very long simulations and is monitored through wandb/tensorboard and not via the .sca files**
 * At test time, sca files are automatically parsed to output key summary statistics to a .csv file.
---------------------------------------------------
+
 ## Citing the repository
---------------------------------------------------
 ```
 @article{10.1145/3512798.3512815,
 author = {Tessler, Chen and Shpigelman, Yuval and Dalal, Gal  
@@ -131,9 +128,9 @@ pages = {43–46},
 numpages = {4}
 }
 ```
---------------------------------------------------
+
 ## Reference Papers
---------------------------------------------------
+
 [1] Tessler, C., Shpigelman, Y., Dalal, G., Mandelbaum, A., Kazakov, D. H., Fuhrer, B., Chechik, G., & Mannor, S. (2021). Reinforcement Learning for Datacenter Congestion Control. http://arxiv.org/abs/2102.09337. arXiv:2102.09337.  
 
 [2] Fuhrer, B., Shpigelman, Y., Tessler, C., Mannor, S., Chechik, G., Zahavi, E., Dalal, G. (2022). Implementing Reinforcement Learning Datacenter Congestion Control in NVIDIA NIC. https://arxiv.org/abs/2207.02295. 	arXiv:2207.02295.
