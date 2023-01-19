@@ -17,11 +17,10 @@ install RL-CC:
 * CCsim simulator enables Congestion Control algorithm development.
 * The simulator is based on the omnest 4.6 simulator.
 * The simulator is pre-compiled **for linux** and located in the dir: `nv_ccsim/`. 
-* It contains the following ingredients:
-		`nv_ccsim/sim/omnetpp.ini` - configuration file of the simulation parameters that can be
-			          modified by the user. (Network parameters, Traffic patterns, 
-                                  Algorithms parameters)
-		`nv_ccsim/sim/ccsim_release` - executables of the simulation in release mode.
+* It contains the following ingredients:  
+		- `nv_ccsim/sim/omnetpp.ini` - configuration file of the simulation parameters that can be
+			          modified by the user. (Network parameters, Traffic patterns, Algorithms parameters)  
+		- `nv_ccsim/sim/ccsim_release` - executables of the simulation in release mode.
 
 * The configuration file contains the three available scenarios:
     - many-to-one
