@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "mlnx_cc_x86_64_hal.h": "c"
-    },
-    "python.analysis.extraPaths": [
-        "./reinforcement_learning/env/utils"
-    ]
-}
