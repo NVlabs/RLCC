@@ -10,6 +10,10 @@ RL-CC requires Python 3.7+.
 install RL-CC:  
 ```pip install -r requirements.txt```
 
+### System requirements
+* linux
+* gcc > 4.9
+
 **Note: the congestion control simulator nv_ccsim is pre-complied for linux (only) and does not require installation.**
 
 ## NVIDIA ConnectX-6Dx CC Simulation
