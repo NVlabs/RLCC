@@ -114,7 +114,7 @@ python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wa
 ```
 ##### Example of evaluating an ADPG model from the command line on the follwowing scenario:
 - 64 hosts 128 QPs per host many-to-one short simulation scenario.
-
+```
 python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>  --learning_rate 0.01 --history_length 2 --agent ADPG --scenarios 64_128_m2o_s --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc_evaluate  --evaluate
 ```
 
