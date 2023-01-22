@@ -9,7 +9,7 @@ env:
   multiprocess: True
 
 agent:
-  save_name: 'debug_2'
+  save_name: 'debug'
   checkpoint: '2048'
   evaluate: True
 
@@ -18,7 +18,6 @@ logging:
   wandb_run_name: test  # Logging using weights and biases
   run_id: ''
   min_log_interval: 1024 # The minimum number of iterations before each log occurs
-  num_tests_to_log: 1
   limit_flows: False
   limit_hosts: 3
   limit_qps: 3

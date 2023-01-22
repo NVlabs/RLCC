@@ -33,7 +33,7 @@ agent:
   agent_type: ADPG
   agent_features:
     - action
-    - rtt_reward
+    - adpg_reward
   discount: .99
   linear_lr_decay: False
   activation_function: relu
@@ -55,7 +55,6 @@ agent:
     loss_batch: 0 # use batch of agents in rollout instead of all agents
     max_batch_size: 8192
     max_step_size: 5000
-    base_rtt: 8192.0
     warmup_length: 1024
     warmup_updates: 50
 
@@ -64,7 +63,6 @@ logging:
   wandb_run_name: test  # Logging using weights and biases
   run_id: ''
   min_log_interval: 1024 # The minimum number of iterations before each log occurs
-  num_tests_to_log: 1
   limit_flows: False
   limit_hosts: 3
   limit_qps: 3

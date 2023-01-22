@@ -4,19 +4,20 @@ This repository conatins the source code and simulator used to train RL-CC for [
 
 ## Installation
 
-### Prerequisites
-RL-CC requires Python 3.7+.  
-### Installing using pip
-install RL-CC:  
-```pip install -r requirements.txt```
+### Dependancies
+* Python version >= 3.7
+* linux OS
+* gcc > 4.9 
 
-### System requirements
-* linux
-* gcc > 4.9
+### Installation steps
+1. clone repository: ```https://gitlab-master.nvidia.com/bfuhrer/rl-cc-demo.git```
+2. install necessary python packages via pip:  ```pip install -r requirements.txt```
+
+
 
 **Note: the congestion control simulator nv_ccsim is pre-complied for linux (only) and does not require installation.**
 
-## NVIDIA ConnectX-6Dx CC Simulation
+## NVIDIA ConnectX-6Dx CC Simulator
 
 * CCsim simulator enables Congestion Control algorithm development.
 * The simulator is based on the omnest 4.6 simulator.
@@ -33,68 +34,91 @@ install RL-CC:
 
     **it is advised to modify the configurations only if you are familiar with the omnest simulator!**
  
-## Configuration
-### Running RL-CC
-Running RL-CC is done through the command-line
-```
-cd reinforcement_learning/
-python3 run.py
-```
-RL-CC may be trained with the following algorithms:
+## RL-CC
+RL-CC may be trained with the following agents/algorithms:
 - DQN
 - PPO
 - Random Agent
 - Supervised Learning
 - ADPG
 
-Algorithm configurations are available at `reinforcement_learning/configs` as yaml files.
-Configurations may be overloaded through the CLI. See `reinforcement_learning/config/args.py` for available arguments.
+Running RL-CC done from `reinforcement_learning/run.py`.
 
-### Specifying scenarios
-Scenarios are specified in the following format: `<num_hosts>_<num_qps_per_hosts>_<scenario_type>_<test_duration>`
+### Configurations
+Default algorithm configurations are available at `reinforcement_learning/configs` as yaml files.
+#### Configuration Parameters
+There are many available configuration parameters depending on the agent used. Here is a list of the general configuration parameters. 
+See `reinforcement_learning/config/args.py` for all available arguments. 
+```
+# Config
+--config    name of the yaml config file to be loaded from `reinforcement_learning/config`
 
-Scenarios may only use specific combinations of hosts and QPs, see `reinforcement_learning/configs/constants.py` for available combinations. 
-* available `<scenario_type>` values are: `m2o` for many-to-one, `a2a` for all-to-all, `ls` for long-short.
-* available `<test_duration>` values are: `s` for a short duration (200 ms), `m` for a medium duration (1 sec), `l` for a long duration (10000 sec).
+# General Parameters
+--agent     type of RL agent, choices are: 'PPO', 'DQN', 'SUPERVISED', 'random', 'ADPG'
+--agent_features  features used as input to policy, default choices for ADPG are: 'action', 'adpg_reward', where 'action' is the previous action taken by the agent and 'adpg_reward' is the resulting reward calculated via the adpg equation 
 
-**For training it is recommended to use a long duration**
+--port_increment    RL-CC interacts with the NVIDIA CC simulator via a TCP socket. port_increment allows to specify which port to connect to.
 
-Note: 
-* **test duration is not specified for the long-short scenario**
-* **long-short should not be used for training** 
+# Env Parameters
+--scenarios     list of scenarios to run on
+--envs_per_scenario     number of environments per scenario
+--max_num_updates      maximum number of policy updates used for training
+--history_length       number of past observations to use as input to the policy
+--evaluate             run rl-cc in evaluation mode (default is False)       
+--verbose              verbosity level of NVIDIA CCsim (recommended verbosity=0)
+--restart_on_end       restart scenario if it finishes
+--multiprocess         run RL-CC on multiple processes
 
-Usage examples: 
+--action_multiplier_dec     percent of action multiplyer for decreasing the transmission rate
+--action_multiplier_inc     percent of action multiplyer for increasing the transmission rate
+
+# Learning Parameters
+--save_name            model save name
+--checkpoint           model checkpoint to load from
+
+# RL-CC (ADPG) loss function parameters
+--target        adpg target value
+--beta          adpg beta value
+--scale         adpg loss scale value
+
+# Logging
+--wandb         project name for logging using weights and biases
+--run_id        wandb run_id for resuming a run
+--wandb_run_name 
+```
+
+
+***Configurations may be overloaded through the CLI.*** 
+#### Specifying CC scenarios
+Scenarios are specified in the following format: `<num_hosts>_<num_qps_per_hosts>_<scenario_type>_<test_duration>`  
+Examples: 
 - many-to-one with 2 hosts and 1 qp per host for training - `2_1_m2o_l` 
 - all-to-all with 4 hosts and 8 qp per host for training - `4_8_a2a_l`
 - long-short with  1 long flow, 7 short flows and 8 qps per flow for test - `8_8_ls`
 
-It is possible to train/test on multiple scenarios at the same time.
+* available `<scenario_type>` values are: `m2o` for many-to-one, `a2a` for all-to-all, `ls` for long-short.
+* available `<test_duration>` values are: `s` for a short duration (200 ms), `m` for a medium duration (1 sec), `l` for a long duration (10000 sec).
+* Scenarios may only use specific combinations of hosts and QPs, see `reinforcement_learning/configs/constants.py` for available combinations. 
 
-
-## Training
-Model training is done by running the script: `reinforcement_learning/run.py`.
-To train the model run the following line (notice it would train the model on 3 scenarios: 2 hosts 1 qp per host many-to-one, 16 hosts 8 qps per host many-to-one, 4 hosts 4 qps per host all-to-all). all of the parameterss bellow can be changes
-
-### Example of training an RL-CC model from the command line
-Example training scenarios:
+Notes
+- **training is recommended on scenarios with a long duration**  
+- **test duration is not specified for the long-short scenario**  
+- **long-short should not be used for training** 
+#### CLI Examples
+##### Example of training an ADPG model from the command line on the follwoing scenarios:
 - 2 hosts 1 qp per host many-to-one long simulation
 - 16 hosts 8 qps per host many-to-one long simulation
 - 4 hosts 4 qps per host all-to-all long simulation
 ```
-python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>   --agent ADPG --scenarios 2_1_m2o_l 16_8_m2o_l 4_4_a2a_l --save_name <model_name> --port_increment 0 --config rlcc
+python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>   --agent ADPG --scenarios 2_1_m2o_l 16_8_m2o_l 4_4_a2a_l --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc
 ```
-
-## Test and visualizing results
-Testing the model is similar to training the model and is done by running the script:  `reinforcement_learning/run.py` and settings the parameter `evaluate: True` in the yaml file or adding `--evaluate` in the command line. 
-
-### Example of evaluating an RL-CC model from the command line 
-Example evaluation scenario: 
+##### Example of evaluating an ADPG model from the command line on the follwowing scenario:
 - 64 hosts 128 QPs per host many-to-one short simulation scenario.
-```
-python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>  --learning_rate 0.01 --history_length 2 --agent ADPG --scenarios 64_128_m2o_s --save_name <model_name> --port_increment 0 --config rlcc_evaluate --agent_features action rtt_reward --evaluate
+
+python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>  --learning_rate 0.01 --history_length 2 --agent ADPG --scenarios 64_128_m2o_s --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc_evaluate  --evaluate
 ```
 
-### Simulator Results
+### Simulation Results
 
 * Simulator run results:
     * Each successfull run on the simulator ends with two basic files:

@@ -71,7 +71,7 @@ class BaseAgent:
 
                 for key, value in env_info.items():
                     # env_info items to ignore during logging
-                    if key not in ['flow_tag', 'host', 'qp', 'rtt_reward']:
+                    if key not in ['flow_tag', 'host', 'qp', 'adpg_reward']:
                         if int(test) < self.config.logging.num_tests_to_log and flow_limit_check:
                             if key not in ['agent_key']:
                                 data_name = key + '/' + env_info['agent_key']
