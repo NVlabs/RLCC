@@ -9,20 +9,20 @@ The CCsim simulator was used to develop the RL-CC algorithm and is based on the 
 The simulator is pre-compiled **to run on linux distributions** and located in the dir: `nv_ccsim/`. 
 It contains the following ingredients:  
 		- `nv_ccsim/sim/omnetpp.ini` - configuration file of the simulation parameters that can be
-			          modified by the user. (Network parameters, Traffic patterns, Algorithms parameters)  
-		- `nv_ccsim/sim/ccsim_release` - executables of the simulation in release mode.
+			          modified by the user. (network parameters, traffic patterns, congestion parameters)  
+		- `nv_ccsim/sim/ccsim_release` - the executable of the simulator in release mode.
 
-The configuration file contains the three available scenarios: many-to-one, all-to-all, long-short
+The configuration file contains the three available scenarios: many-to-one, all-to-all, long-short.
 
-    **it is advised to modify the configurations only if you are familiar with the omnest simulator!**
+***it is advised to modify the configurations only if you are familiar with the omnest simulator!***
 
 ## 2. Installation   
 Before installing RL-CC make sure to install Python version >= 3.7.
 
 To install run
 ```cmd
-git clone https://gitlab-master.nvidia.com/bfuhrer/rl-cc-demo.git  
-pip install -r requirements.txt
+1. git clone https://gitlab-master.nvidia.com/bfuhrer/rl-cc-demo.git  
+2. pip install -r requirements.txt
 ```
  
 ## 3. Running RL-CC 
@@ -30,13 +30,13 @@ Running RL-CC is done from  `reinforcement_learning/run.py`.
 When running RL-CC there are two separate phases: training and evaluation.
 Both phases require configuring the RL-CC agent and the CCsim environment.
 
-Default configurations per RL-CC agent type are available at `reinforcement_learning/configs` as yaml files. All parameters are modifiable and can be overloaded through the CLI.  
-Below is a detailed list of all available parameters and how to configure them.
+Default configurations per RL-CC agent type are available at `reinforcement_learning/configs` as yaml files. All parameters are modifiable and can be overloaded through the CLI. Below is a detailed list of all available parameters and how to configure them.
 ### 3.1 Agent Configuration Parameters
 <!-- RL-CC may be trained with five agent types/algorithms:
 - DQN,  PPO, Random Agent, Supervised Learning, ADPG.   -->
 
 ```yaml
+## Agent parameters
 agent:                  "RL-CC may be trained with five agent types/algorithms:
                          PPO, DQN, SUPERVISED, random, ADPG"
 agent_features:         "features used as input to policy, choices: 
@@ -50,6 +50,7 @@ action_multiplier_inc:  "percent of action multiplyer for increasing the transmi
 
 ### 3.2 CCsim Environment Parameters
 ```yaml
+## CCsim parameters
 scenarios:           "list of scenarios to run on (see below for detailed explanation)"
 envs_per_scenario:   "number of environments per scenario"
 verbose:             "verbosity level of NVIDIA CCsim (recommended verbose=False)"
@@ -58,24 +59,21 @@ multiprocess:        "run RL-CC on multiple processes in parallel"
 port_increment:      "RL-CC interacts with the NVIDIA CC simulator via a TCP socket. 
                       port_increment specifies which port to connect to."
 ```
-Specifying CC scenarios is done the following format: `<num_hosts>_<num_qps_per_hosts>_<scenario_type>_<test_duration>`  
-Examples: 
+Specifying CC scenarios is done the following format: `<num_hosts>_<num_qps_per_hosts>_<scenario_type>_<test_duration>`.
+The `<scenario_type>` choices are: `m2o` for many-to-one, `a2a` for all-to-all, `ls` for long-short. The `<test_duration>` choices are: `s` for a short duration (200 ms), `m` for a medium duration (1 sec), `l` for a long duration (10000 sec). When choosing CC scenarios, only a specific set of <num_hosts>_<num_qps_per_hosts> combinations ara possible, see `reinforcement_learning/configs/constants.py` for available combinations. Also, for the long-short scenario, the test duration does not need to be specified.
+
+Usage Examples: 
 - many-to-one with 2 hosts and 1 qp per host for training - `2_1_m2o_l` 
 - all-to-all with 4 hosts and 8 qp per host for training - `4_8_a2a_l`
 - long-short with  1 long flow, 7 short flows and 8 qps per flow for test - `8_8_ls`
 
-* available `<scenario_type>` values are: `m2o` for many-to-one, `a2a` for all-to-all, `ls` for long-short.
-* available `<test_duration>` values are: `s` for a short duration (200 ms), `m` for a medium duration (1 sec), `l` for a long duration (10000 sec).
-* Scenarios may only use specific combinations of hosts and QPs, see `reinforcement_learning/configs/constants.py` for available combinations. 
-
-Test duration is not specified for the long-short scenario
-
 ### 3.3 Training RL-CC
 RL-CC is trained for a pre-specified number of policy updates. After each update, the policy is saved as a checkpoint that corresponds to the total number of steps taken in the environment since the beginning.
-RL-CC training monitoring is done through weights and biases. The following parameters are logged and are used to determine model convergance: nack_ratio, cnp_ratio, rate, adpg_reward, rtt_inflation, bandwidth, action, and loss. 
+RL-CC training monitoring is done through weights and biases. The following parameters are logged and are used to determine model convergance: ***nack_ratio, cnp_ratio, rate, adpg_reward, rtt_inflation, bandwidth, action, and loss***. 
 For best results, we recommended training on many-to-one and all-to-all scenarios with long durations.  
 Below is the full list of training parameters. 
 ```yaml
+## Training parameters
 save_name:               "model save name"
 reward:                  "reward function: general, distance,
                           constrained, adpg_reward"
