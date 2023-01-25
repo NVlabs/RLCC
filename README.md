@@ -151,14 +151,14 @@ verbose:                 "verbosity level of CCsim output (recommended verbose=T
 ```
 
 ### 3.5 CLI Examples
-Example of training an ADPG model from the command line on the follwoing scenarios:
+Example of training an ADPG model from the command line on the following scenarios:
 - 2 hosts 1 qp per host many-to-one long simulation
 - 16 hosts 8 qps per host many-to-one long simulation
 - 4 hosts 4 qps per host all-to-all long simulation
 ```bash
 python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>   --agent ADPG --scenarios 2_1_m2o_l 16_8_m2o_l 4_4_a2a_l --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc
 ```
-Example of evaluating an ADPG model from the command line on the follwowing scenario:
+Example of evaluating an ADPG model from the command line on the following scenario:
 - 64 hosts 128 QPs per host many-to-one short simulation scenario.
 ```bash
 python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>  --learning_rate 0.01 --history_length 2 --agent ADPG --scenarios 64_128_m2o_s --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc_evaluate  --evaluate
