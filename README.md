@@ -2,95 +2,63 @@
 RL-CC is an RDMA congestion control algorithm trained with the analytical deterministic policy gradient method (ADPG) (Tessler et al. 2021) [1].  
 This repository conatins the source code and simulator used to train RL-CC for [1] and [2]. 
 
-## Installation
 
-### Dependancies
-* Python version >= 3.7
-* linux OS
-* gcc > 4.9 
+## 1. About the NVIDIA ConnectX-6Dx CC Simulator
 
-### Installation steps
-1. clone repository: ```https://gitlab-master.nvidia.com/bfuhrer/rl-cc-demo.git```
-2. install necessary python packages via pip:  ```pip install -r requirements.txt```
-
-
-
-**Note: the congestion control simulator nv_ccsim is pre-complied for linux (only) and does not require installation.**
-
-## NVIDIA ConnectX-6Dx CC Simulator
-
-* CCsim simulator enables Congestion Control algorithm development.
-* The simulator is based on the omnest 4.6 simulator.
-* The simulator is pre-compiled **for linux** and located in the dir: `nv_ccsim/`. 
-* It contains the following ingredients:  
+The CCsim simulator was used to develop the RL-CC algorithm and is based on the omnest 4.6 simulator.
+The simulator is pre-compiled **to run on linux distributions** and located in the dir: `nv_ccsim/`. 
+It contains the following ingredients:  
 		- `nv_ccsim/sim/omnetpp.ini` - configuration file of the simulation parameters that can be
 			          modified by the user. (Network parameters, Traffic patterns, Algorithms parameters)  
 		- `nv_ccsim/sim/ccsim_release` - executables of the simulation in release mode.
 
-* The configuration file contains the three available scenarios:
-    - many-to-one
-    - all-to-all
-    - long-short
+The configuration file contains the three available scenarios: many-to-one, all-to-all, long-short
 
     **it is advised to modify the configurations only if you are familiar with the omnest simulator!**
+
+## 2. Installation   
+Before installing RL-CC make sure to install Python version >= 3.7.
+
+To install run
+```cmd
+git clone https://gitlab-master.nvidia.com/bfuhrer/rl-cc-demo.git  
+pip install -r requirements.txt
+```
  
-## RL-CC
-RL-CC may be trained with the following agents/algorithms:
-- DQN
-- PPO
-- Random Agent
-- Supervised Learning
-- ADPG
+## 3. Running RL-CC 
+Running RL-CC is done from  `reinforcement_learning/run.py`.  
+When running RL-CC there are two separate phases: training and evaluation.
+Both phases require configuring the RL-CC agent and the CCsim environment.
 
-Running RL-CC done from `reinforcement_learning/run.py`.
+Default configurations per RL-CC agent type are available at `reinforcement_learning/configs` as yaml files. All parameters are modifiable and can be overloaded through the CLI.  
+Below is a detailed list of all available parameters and how to configure them.
+### 3.1 Agent Configuration Parameters
+<!-- RL-CC may be trained with five agent types/algorithms:
+- DQN,  PPO, Random Agent, Supervised Learning, ADPG.   -->
 
-### Configurations
-Default algorithm configurations are available at `reinforcement_learning/configs` as yaml files.
-#### Configuration Parameters
-There are many available configuration parameters depending on the agent used. Here is a list of the general configuration parameters. 
-See `reinforcement_learning/config/args.py` for all available arguments. 
-```
-# Config
---config    name of the yaml config file to be loaded from `reinforcement_learning/config`
-
-# General Parameters
---agent     type of RL agent, choices are: 'PPO', 'DQN', 'SUPERVISED', 'random', 'ADPG'
---agent_features  features used as input to policy, default choices for ADPG are: 'action', 'adpg_reward', where 'action' is the previous action taken by the agent and 'adpg_reward' is the resulting reward calculated via the adpg equation 
-
---port_increment    RL-CC interacts with the NVIDIA CC simulator via a TCP socket. port_increment allows to specify which port to connect to.
-
-# Env Parameters
---scenarios     list of scenarios to run on
---envs_per_scenario     number of environments per scenario
---max_num_updates      maximum number of policy updates used for training
---history_length       number of past observations to use as input to the policy
---evaluate             run rl-cc in evaluation mode (default is False)       
---verbose              verbosity level of NVIDIA CCsim (recommended verbosity=0)
---restart_on_end       restart scenario if it finishes
---multiprocess         run RL-CC on multiple processes
-
---action_multiplier_dec     percent of action multiplyer for decreasing the transmission rate
---action_multiplier_inc     percent of action multiplyer for increasing the transmission rate
-
-# Learning Parameters
---save_name            model save name
---checkpoint           model checkpoint to load from
-
-# RL-CC (ADPG) loss function parameters
---target        adpg target value
---beta          adpg beta value
---scale         adpg loss scale value
-
-# Logging
---wandb         project name for logging using weights and biases
---run_id        wandb run_id for resuming a run
---wandb_run_name 
+```yaml
+agent:                  "RL-CC may be trained with five agent types/algorithms:
+                         PPO, DQN, SUPERVISED, random, ADPG"
+agent_features:         "features used as input to policy, choices: 
+                         nack_ratio, cnp_ratio, bandwidth, bytes_sent, 
+                         rtt_inflation, cur_rate, action, adpg_reward"
+history_length:         "number of past observations to use as input to the policy"
+evaluate:               "run agent in evaluation mode" 
+action_multiplier_dec:  "percent of action multiplyer for decreasing the transmission rate"
+action_multiplier_inc:  "percent of action multiplyer for increasing the transmission rate"
 ```
 
-
-***Configurations may be overloaded through the CLI.*** 
-#### Specifying CC scenarios
-Scenarios are specified in the following format: `<num_hosts>_<num_qps_per_hosts>_<scenario_type>_<test_duration>`  
+### 3.2 CCsim Environment Parameters
+```yaml
+scenarios:           "list of scenarios to run on (see below for detailed explanation)"
+envs_per_scenario:   "number of environments per scenario"
+verbose:             "verbosity level of NVIDIA CCsim (recommended verbose=False)"
+restart_on_end:      "restart scenario if it finishes before training ends"
+multiprocess:        "run RL-CC on multiple processes in parallel"
+port_increment:      "RL-CC interacts with the NVIDIA CC simulator via a TCP socket. 
+                      port_increment specifies which port to connect to."
+```
+Specifying CC scenarios is done the following format: `<num_hosts>_<num_qps_per_hosts>_<scenario_type>_<test_duration>`  
 Examples: 
 - many-to-one with 2 hosts and 1 qp per host for training - `2_1_m2o_l` 
 - all-to-all with 4 hosts and 8 qp per host for training - `4_8_a2a_l`
@@ -100,38 +68,105 @@ Examples:
 * available `<test_duration>` values are: `s` for a short duration (200 ms), `m` for a medium duration (1 sec), `l` for a long duration (10000 sec).
 * Scenarios may only use specific combinations of hosts and QPs, see `reinforcement_learning/configs/constants.py` for available combinations. 
 
-Notes
-- **training is recommended on scenarios with a long duration**  
-- **test duration is not specified for the long-short scenario**  
-- **long-short should not be used for training** 
-#### CLI Examples
-##### Example of training an ADPG model from the command line on the follwoing scenarios:
+Test duration is not specified for the long-short scenario
+
+### 3.3 Training RL-CC
+RL-CC is trained for a pre-specified number of policy updates. After each update, the policy is saved as a checkpoint that corresponds to the total number of steps taken in the environment since the beginning.
+RL-CC training monitoring is done through weights and biases. The following parameters are logged and are used to determine model convergance: nack_ratio, cnp_ratio, rate, adpg_reward, rtt_inflation, bandwidth, action, and loss. 
+For best results, we recommended training on many-to-one and all-to-all scenarios with long durations.  
+Below is the full list of training parameters. 
+```yaml
+save_name:               "model save name"
+reward:                  "reward function: general, distance,
+                          constrained, adpg_reward"
+max_num_updates:         "maximum number of policy updates used for training"
+learning_rate:           "optimizer learning rate"
+discount:                "discount factor"
+linear_lr_decay:         "use linear learning rate decay"
+use_rnn:                 "use a recursive layer in the model architecture:
+                          RNN, GRU, LSTM"
+gradient_clip:           "gradient clipping value"
+architecture:            "neural network mlp architecture
+                          ex: 12 will generate an mlp with a single
+                          12 node hidden layer" 
+activation_function:     "activation function between hidden layers: relu or tanh
+                          output activation is always tanh."
+bias:                    "use bias in mlp layers"
+## ADPG  
+rollout_length:          "length of rollout buffer"
+target:                  "adpg target value"
+beta:                    "adpg beta value"
+scale:                   "adpg reward scale factor"
+action_loss_coeff:       "coefficient of action loss"
+reward_loss_coeff:       "coefficient of reward loss"
+loss_batch:              "use batch of agents in rollout instead of all agents"
+max_batch_size:          "maximum number of agent steps to use from the rollout
+                          buffer while calculating the reward rollout"
+max_step_size:           "maximum number of steps in the environment when 
+                          collecting a rollout"
+warmup_length:           "maximum number of steps in the environment when 
+                          collecting a rollout in the warmup stage"
+warmup_updates:          "number of policy updates for warmup stage"
+## PPO
+actor_architecture:      "actor mlp architecture (see architecture above)"
+critic_architectur:      "critic mlp architecture (see architecture above)"
+baseline_coeff:          "value function loss coefficient"
+entropy_coeff:           "entropy loss coefficient"
+use_gae:                 "use general advantage estimation"
+gae_tau:                 "tau parameter used in gae calculation"
+ppo_ratio_clip:          "ppo clipping value"
+ppo_batch_size:          "ppo minibatch size"
+ppo_optimization_epochs: "number of optimization epochs per rollout"
+rollouts_per_batch:      "number of rollouts per batch"
+discrete_actions:        "use discrete actions instead of continuous"
+## DQN 
+replay_size:             "size of replay buffer"
+target_update_interval:  "interval for target network update"
+eps_start:               "epsilon start value"
+eps_end:                 "epsilon end value"
+eps_decay:               "epsilon decay value"
+## Supervised Learning
+batch_size:              "batch size"
+## Logging parameters for weights and biases
+wandb:                   "project name for logging using weights and biases"
+run_id:                  "wandb run_id for resuming a run"
+wandb_run_name:          "run name"
+log_interval:            "The number of environment steps between logs (average values are logged)"
+limit_flows:             "whether to limit the number of flows logged"
+limit_hosts:             "maximum number of hosts to log"
+limit_qps:               "maximum number of qps per host to log"
+```   
+
+### 3.4 Evaluating RL-CC
+An RL-CC model is evaluated by loading a trained model and running its policy in inference on desired scenarios. Each successfull CCsim run on ends with a .sca file that holds:  
+* information regarding the test that was preformed, how many hosts we had, how many flows, run timestamp, etc.
+* Run statistics: bandwidth, packet latency, packet drops, and much more.  
+
+At the end of the evaluation phase the .sca files are automatically parsed to output key summary statistics to a .csv file for each scenario. The results can be found at: `nv_ccsim/sim/results`.  
+Below are the evaluation parameters
+```yaml
+## Evaluation parameters
+save_name:               "name of model to load"
+checkpoint:              "specific checkpoint of model"
+evaluate:                "must be set to true for evaluation"
+verbose:                 "verbosity level of CCsim output (recommended verbose=True)"
+```
+
+### 3.5 CLI Examples
+Example of training an ADPG model from the command line on the follwoing scenarios:
 - 2 hosts 1 qp per host many-to-one long simulation
 - 16 hosts 8 qps per host many-to-one long simulation
 - 4 hosts 4 qps per host all-to-all long simulation
-```
+```bash
 python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>   --agent ADPG --scenarios 2_1_m2o_l 16_8_m2o_l 4_4_a2a_l --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc
 ```
-##### Example of evaluating an ADPG model from the command line on the follwowing scenario:
+Example of evaluating an ADPG model from the command line on the follwowing scenario:
 - 64 hosts 128 QPs per host many-to-one short simulation scenario.
-```
+```bash
 python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>  --learning_rate 0.01 --history_length 2 --agent ADPG --scenarios 64_128_m2o_s --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc_evaluate  --evaluate
 ```
 
-### Simulation Results
 
-* Simulator run results:
-    * Each successfull run on the simulator ends with two basic files:
-        * .params
-        * .sca file this file holds data regarding:
-            * The test that was preformed, how many hosts we had, how many flows and etc.
-            * The timestamp of the run.
-            * Run statistics. This data includes: bw, packet latency, packet drops, and much more. 
-            * .sca file is created automatically only at the end of the run
-    * Additional file that can be created during the run is a vector file. a vector files holds the data that was sampled during all of the run and not only run statistics .sca fille does.
-* Run results can be found at: `nv_ccsim/sim/results`.
-* **Training is typically done on very long simulations and is monitored through wandb/tensorboard and not via the .sca files**
-* At test time, sca files are automatically parsed to output key summary statistics to a .csv file.
 
 ## Citing the repository
 ```

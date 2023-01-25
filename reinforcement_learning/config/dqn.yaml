@@ -9,10 +9,6 @@ env:
     - "32_1_m2o_l"
   envs_per_scenario: 1
   history_length: 2
-  omnet:
-    simulator_path: ../nv_ccsim/sim  # relative to reinforcement_learning dir
-    exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
-    config_path: omnetpp.ini
   reward: general
   port_increment: 10
   save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/
@@ -48,7 +44,7 @@ agent:
     activation_function: relu
     bias: false
     use_rnn: null
-    action_weights:
+    action_weights: # discretization of the range [0.8, 1.2]
       - 0.8
       - 0.95
       - 1
@@ -67,7 +63,7 @@ logging:
   wandb: false  # Logging using weights and biases
   wandb_run_name: test  # Logging using weights and biases
   run_id: ''
-  min_log_interval: 1024 # The minimum number of iterations before each log occurs
+  log_interval: 1024 # The minimum number of iterations before each log occurs
   limit_flows: False
   limit_hosts: 3
   limit_qps: 3

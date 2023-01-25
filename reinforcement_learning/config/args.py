@@ -47,6 +47,7 @@ def parse_args():
     parser.add_argument('--critic_architecture', type=int, default=-1, nargs='*')
     parser.add_argument('--architecture', type=int, default=-1, nargs='*')
     parser.add_argument('--rollout_length', type=int, default=-1)
+    parser.add_argument('--reward', type=str, choices=['general', 'distance', 'constrained', 'adpg_reward'])
 
     # ADPG loss function parameters
     parser.add_argument('--target', type=float)
@@ -55,7 +56,7 @@ def parse_args():
     parser.add_argument('--scale', type=float, default=-1)
 
     parser.add_argument('--action_loss_coeff', default=1, type=float)
-    parser.add_argument('--loss_scale', default=10, type=float)
+    parser.add_argument('--reward_loss_coeff', default=10, type=float)
 
     parser.add_argument('--loss_batch', type=int, default=-1)
     parser.add_argument('--max_batch_size', type=int, default=-1)
@@ -63,10 +64,8 @@ def parse_args():
 
     # PPO
     parser.add_argument('--agent_features', type=str, default=-1, nargs='*', choices=['nack_ratio', 'cnp_ratio', 'bandwidth', 'bytes_sent', 'rtt_inflation', 'cur_rate', 'action', 'adpg_reward'])
-    parser.add_argument('--reward', type=str)
     parser.add_argument('--ppo_ratio_clip', default=-1, type=float)
     parser.add_argument('--ppo_batch_size', default=-1, type=int)
-    parser.add_argument('--ppo_num_minibatch', default=-1, help='Will be ignored if ppo_batch_size > 0', type=int)
     parser.add_argument('--ppo_optimization_epochs', default=-1, type=int)
     parser.add_argument('--rollouts_per_batch', type=int, default=-1)
     parser.add_argument('--discrete_actions', action='store_true', default=-1)
@@ -78,6 +77,7 @@ def parse_args():
     parser.add_argument('--wandb', default=-1, type=str_parser)  # Logging using weights and biases
     parser.add_argument('--run_id', default='', type=str)  # Logging using weights and biases
     parser.add_argument('--wandb_run_name', default='train_default_config', type=str_parser)  # Logging using weights and biases
+    parser.add_argument('--log_interval', default=-1, type=int)  # Logging using weights and biases
     parser.add_argument('--limit_flows', action='store_true')  # used to avoid over logging wandb
     parser.add_argument('--limit_hosts', type=int)  # max host id to log
     parser.add_argument('--limit_qps', type=int)  # max qp id per host to log

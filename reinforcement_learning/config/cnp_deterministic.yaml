@@ -3,12 +3,6 @@ env:
     - 2_1_m2o
   envs_per_scenario: 8
   history_length: 1
-  omnet:
-    recv_len: 15  # number of features received from the OMNeT simulator
-    size_of_data: 4  # size of float or uint32_t
-    simulator_path: ../nv_ccsim/sim  # relative to reinforcement_learning dir
-    exe_path: ../bin/ccsim_release  # relative to run_path
-    config_path: ccsim.ini # relative to run_path
   reward: constrained
   default_port: 5555
   port_increment: 0
@@ -43,4 +37,4 @@ agent:
 logging:
   wandb: False  # Logging using weights and biases
   wandb_run_name: unnamed  # Logging using weights and biases
-  min_log_interval: 1024 # The minimum number of iterations before each log occurs
+  log_interval: 1024 # The minimum number of iterations before each log occurs

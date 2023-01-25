@@ -95,7 +95,7 @@ class OMNeTpp(gym.Env):
             To initialize the simulator, we need to ensure that several environment variables are set.
         """
         if 'nv_ccsim/sim' not in os.getcwd():
-            os.chdir(self.config.env.omnet.simulator_path)
+            os.chdir('../nv_ccsim/sim')
             os.environ['LD_LIBRARY_PATH'] = '../lib:../lib/python_2.7.11/lib/'
             os.environ['NEDPATH'] = '../ned/algo/:../ned/prog_cc:../ned/dctg/'
             os.environ['PATH'] = '../lib/python_2.7.11/bin:' + os.environ['PATH']
@@ -120,7 +120,7 @@ class OMNeTpp(gym.Env):
         # on for communication with our gym env.
         print(f"Resetting env: {self.scenario_raw_name}")
         subprocess.Popen([
-            self.config.env.omnet.exe_path, self.config.env.omnet.config_path,
+            '../bin/ccsim_release', 'omnetpp.ini',
             '-c', self.scenario_name,
             '-r', str(self.test_number),
             '-u', 'Cmdenv',

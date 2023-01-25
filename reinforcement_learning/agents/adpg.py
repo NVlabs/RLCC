@@ -287,7 +287,9 @@ class ADPG(BaseAgent):
             scenario_loss_agents[scenario] += 1
 
             action_loss_coeff = self.config.agent.adpg.action_loss_coeff
-            agent_reward_loss, agent_action_loss = get_loss(actions, rewards, batch_size, scenario, self.config.agent.adpg.loss_scale, action_loss_coeff, scenario_loss, self.config.agent.discount)
+            reward_loss_coeff = self.config.agent.adpg.reward_loss_coeff
+            
+            agent_reward_loss, agent_action_loss = get_loss(actions, rewards, batch_size, scenario, reward_loss_coeff, action_loss_coeff, scenario_loss, self.config.agent.discount)
             agent_reward_loss = agent_reward_loss / num_agents
             agent_action_loss = agent_action_loss / num_agents
 

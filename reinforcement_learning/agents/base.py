@@ -80,7 +80,7 @@ class BaseAgent:
                                     self.logging_data[data_name] = []
                                 self.logging_data[data_name].append(value)
 
-            if timesteps % self.config.logging.min_log_interval == 0:
+            if timesteps % self.config.logging.log_interval == 0:
                 for key, value in self.logging_data.items():
                     if isinstance(value, list) and len(value) > 0:
                         if isinstance(value, torch.Tensor):

@@ -9,10 +9,6 @@ env:
     - "64_128_m2o_l"
   envs_per_scenario: 1
   history_length: 2
-  omnet:
-    simulator_path: ../nv_ccsim/sim  # relative to reinforcement_learning dir 
-    exe_path: ../bin/ccsim_release  #../bin/ccsim_release  # relative to run_path
-    config_path: omnetpp.ini
   reward: adpg_reward
   port_increment: 50
   save_path: '../../reinforcement_learning/output/'  # relative path to nv_ccsim/sim/
@@ -48,10 +44,9 @@ agent:
     target: 0.064
     action_loss_coeff: 1
     beta: 1.5
-    loss_scale: 1.0
+    reward_loss_coeff: 1.0
     scale: 12.5
     bias: False
-    constraint: buffer
     loss_batch: 0 # use batch of agents in rollout instead of all agents
     max_batch_size: 8192
     max_step_size: 5000
@@ -62,7 +57,7 @@ logging:
   wandb: false  # Logging using weights and biases
   wandb_run_name: test  # Logging using weights and biases
   run_id: ''
-  min_log_interval: 1024 # The minimum number of iterations before each log occurs
+  log_interval: 1024 # The minimum number of iterations before each log occurs
   limit_flows: False
   limit_hosts: 3
   limit_qps: 3
