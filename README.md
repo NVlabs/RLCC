@@ -69,7 +69,7 @@ Usage Examples:
 
 ### 3.3 Training RL-CC
 RL-CC is trained for a pre-specified number of policy updates. After each update, the policy is saved as a checkpoint that corresponds to the total number of steps taken in the environment since the beginning.
-RL-CC training monitoring is done through weights and biases. The following parameters are logged and are used to determine model convergance: ***nack_ratio, cnp_ratio, rate, adpg_reward, rtt_inflation, bandwidth, action, and loss***. 
+RL-CC training monitoring is done through weights and biases. The following parameters are logged and are used to determine model convergance: ***nack_ratio, cnp_ratio, rate, adpg_reward, rtt_inflation, bandwidth, bytes_sent, action, and loss***. 
 For best results, we recommended training on many-to-one and all-to-all scenarios with long durations.  
 Below is the full list of training parameters. 
 ```yaml

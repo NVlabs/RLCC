@@ -6,11 +6,10 @@ env:
     - "4_16_a2a_l"
     - "8_8_a2a_l"
     - "8_16_a2a_l"
-    - "64_128_m2o_l"
   envs_per_scenario: 1
   history_length: 2
   reward: adpg_reward
-  port_increment: 50
+  port_increment: 10
   save_path: '../../reinforcement_learning/output/'  # relative path to nv_ccsim/sim/
   verbose: False
   restart_on_end: True

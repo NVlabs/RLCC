@@ -24,7 +24,7 @@ class Server:
         self.config = config
         self.port = port
         self.server_socket = self.open_server_socket(port=self.port)
-        self.server_socket.settimeout(5)
+        self.server_socket.settimeout(300)
         self.connection, self.client_address = None, None
 
     def step(self, action) -> RawFeatures:
@@ -54,7 +54,7 @@ class Server:
                 rtt_packet_delay=unpacked_data[0] / BASE_RTT, # rtt latency in nanoseconds normalized by 8192 as the base_rtt ,
                 nacks_received=unpacked_data[1], # number nack packets received
                 cnps_received=unpacked_data[2] , # number cnp packets received
-                bytes_sent=unpacked_data[3], # number of bytes sent
+                bytes_sent=unpacked_data[3], # number of bytes sent 
                 cur_rate=unpacked_data[4] * 1. / (1 << 20), # current rate between min_rate and 1 in units of fixed-point 20
                 monitor_interval_width=unpacked_data[5], # number nack packets received
                 packets_sent=unpacked_data[6], # number of packets sent
@@ -104,6 +104,6 @@ class Server:
     def open_server_socket(port: int, host: str = 'localhost') -> socket.socket:
         serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         serversocket.bind((host, port))
-        serversocket.listen(5)
+        serversocket.listen(300)
         return serversocket
 

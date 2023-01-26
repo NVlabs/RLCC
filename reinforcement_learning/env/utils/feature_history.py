@@ -130,6 +130,7 @@ class FeatureHistory:
             rtt_inflation=self.state_history_dict[agent_key][-1].rtt_inflation,
             bandwidth=self.state_history_dict[agent_key][-1].bandwidth,
             action=self.state_history_dict[agent_key][-1].action,
+            bytes_sent=self.state_history_dict[agent_key][-1].bytes_sent,
         )
 
         return np.array(features).flatten(), logging_information, self.state_history_dict[agent_key][-1]
