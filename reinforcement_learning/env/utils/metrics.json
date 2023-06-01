@@ -9,24 +9,17 @@
                 "param_name": "egress-BW-Gbps",
                 "field": "mean",
                 "filters": {
-                    "netq": "index != 0"
+                    "netq": "index == 0"
                 }
             },
             "goodput": {
                 "param_name": "goodPutvecGbps",
                 "field": "mean",
+                "operation": "goodput*hosts",
                 "filters": {
                     "host": "index != 0"
                 }
-            },
-            "bw_per_qp": {
-                "param_name": "gen-BW-MBps",
-                "field": "mean",
-                "operation": "bw_per_qp*8/1000*qps*hosts",
-                "filters": {
-                    "gen": "ancestorIndex(2)!=0"
-                }
-            },            
+            },           
             "host_bw": {
                 "param_name": "out-bw-Gbps",
                 "field": "mean",
@@ -61,21 +54,14 @@
     "all-to-all": {
         "params": {
             "hosts": "attr H",
-            "qps": "attr QPP"
+            "qps": "attr Q",
+            "qpp": "attr QPP"
         },
         "metrics": {
             "switch_bw": {
                 "param_name": "egress-BW-Gbps",
                 "field": "mean"
-            },
-            "bw_per_qp": {
-                "param_name": "gen-BW-MBps",
-                "field": "mean",
-                "operation": "bw_per_qp*8/1000*qps*(hosts-1)",
-                "filters": {
-                    "gen": "(int(index/qps)!=ancestorIndex(2)  and  int(index/qps)<hosts)"
-                }
-            },   
+            },  
             "goodput": {
                 "param_name": "goodPutvecGbps",
                 "field": "mean"

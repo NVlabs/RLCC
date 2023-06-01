@@ -119,7 +119,7 @@ class OMNeTpp(gym.Env):
         # The scenario name and test number will define the test config, including which port the simulator will listen
         # on for communication with our gym env.
         print(f"Resetting env: {self.scenario_raw_name}")
-        subprocess.Popen([
+        self.p = subprocess.Popen([
             '../bin/ccsim_release', 'omnetpp.ini',
             '-c', self.scenario_name,
             '-r', str(self.test_number),
@@ -160,10 +160,8 @@ class OMNeTpp(gym.Env):
         self.last_bw_request[self.previous_host_flow_tag[0]][self.previous_host_flow_tag[1]] = min(self.previous_cur_rate * action, 1.)
         
         self.feature_history.update_action(self.previous_host_flow_tag[0], self.previous_host_flow_tag[1], action)
-
         # Perform a step in the simulator and process the received raw features.
-        raw_features = self.server.step(action)
-        #print(f"updating action {action} for: {self.scenario + '_' + str(self.env_number) + '/' + self.previous_host_flow_tag[0] + '/' + self.previous_host_flow_tag[1]}")
+        raw_features = self.server.step(action, self.p)
         if raw_features is None:
             if self.config.env.restart_on_end:
                 return self.reset()

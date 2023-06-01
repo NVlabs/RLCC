@@ -11,7 +11,6 @@ env:
   history_length: 2
   reward: general
   port_increment: 10
-  save_path: '../../reinforcement_learning/output/'  # relative path to NVIDIACCSimSetup/sim/
   verbose: False
   restart_on_end: True
   multiprocess: False

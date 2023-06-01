@@ -19,10 +19,7 @@ class BaseAgent:
         self.logging_data = {}
         self.timesteps = 0
         self.log_key_hist = defaultdict(lambda: 0)
-        self.save_path = config.env.save_path
-        if self.save_path[-1] != '/':
-            self.save_path += '/'
-
+        self.save_path = os.path.abspath(os.path.join(os.path.realpath(__file__), os.pardir, os.pardir, 'output/'))
         
     def act(self, state: torch.tensor):
         raise NotImplementedError
@@ -31,7 +28,7 @@ class BaseAgent:
         raise NotImplementedError
 
     def save_model(self, checkpoint):
-        save_path = f'{self.save_path}{self.config.agent.save_name}/'
+        save_path = f'{self.save_path}/{self.config.agent.save_name}/'
         name = ''
         checkpoint_name = str(checkpoint)
         if len(self.config.agent.save_name) > 0:
@@ -53,9 +50,11 @@ class BaseAgent:
                 self.timesteps = int(self.config.agent.checkpoint)
             except:
                 pass
-        file_list = os.listdir(f'{self.save_path}' + name)
+        file_list = os.listdir(f'{self.save_path}/' + name)
         filename = [f for f in file_list if self.config.agent.agent_type + checkpoint in f and '.txt' not in f]
-        checkpoint_state_dict = torch.load(f'{self.save_path}' + name + '/' + filename[0])
+        load_path = f'{self.save_path}/' + name + '/' + filename[0]
+        print(f'loading model from: {load_path}')
+        checkpoint_state_dict = torch.load(load_path, map_location=torch.device(self.config.device))
         self.model.load_state_dict(checkpoint_state_dict['model_state_dict'])
 
     def test(self):
@@ -72,7 +71,7 @@ class BaseAgent:
                 for key, value in env_info.items():
                     # env_info items to ignore during logging
                     if key not in ['flow_tag', 'host', 'qp', 'adpg_reward']:
-                        if int(test) < self.config.logging.num_tests_to_log and flow_limit_check:
+                        if flow_limit_check:
                             if key not in ['agent_key']:
                                 data_name = key + '/' + env_info['agent_key']
 

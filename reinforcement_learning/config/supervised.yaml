@@ -15,7 +15,6 @@ env:
     config_path: omnetpp.ini
   reward: adpg_reward
   port_increment: 50
-  save_path: '../../reinforcement_learning/output/'  # relative path to nv_ccsim/sim/
   verbose: False
   restart_on_end: True
   multiprocess: False

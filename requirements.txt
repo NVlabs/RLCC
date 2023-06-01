@@ -3,6 +3,7 @@ env==0.1.0
 gym==0.21.0
 pytest==7.2.0
 PyYAML==6.0
-torch==1.12.1
+--find-links https://download.pytorch.org/whl/cu117/torch_stable.html
+torch==1.13.1+cu117
 wandb==0.13.7
-stable_baseline3==1.6.2
+stable_baselines3==1.6.2

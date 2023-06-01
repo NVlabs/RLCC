@@ -47,10 +47,6 @@ class ADPG(BaseAgent):
         if self.config.agent.evaluate:
             self.load_model()
                 
-        save_path = f'{self.save_path}{self.config.agent.save_name}/info/'
-        if not os.path.exists(save_path):
-            Path(save_path).mkdir(parents=True)
-
         if self.config.logging.wandb is not None:
             self.config.logging.wandb.watch(self.model, log=None, log_freq=1000)
 
@@ -101,6 +97,7 @@ class ADPG(BaseAgent):
 
         print('Finished tests')
         
+    # def distil(self) -> None:
 
     def train(self) -> None:
         timesteps = self.timesteps + 1 if self.timesteps > 0 else 0

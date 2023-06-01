@@ -17,8 +17,9 @@ except:
 sys.path.append(os.getcwd())
 
 def load_config(config: Config) -> Config:
-    with open(f'{config.env.save_path}{config.agent.save_name}/config.pkl', 'rb') as f:
+    with open(f'output/{config.agent.save_name}/config.pkl', 'rb') as f:
         old_config = pickle.load(f)
+    old_config.agent.save_name = config.agent.save_name
     old_config.agent.checkpoint = config.agent.checkpoint
     old_config.agent.evaluate = True
     old_config.env.scenarios = config.env.scenarios
@@ -27,10 +28,11 @@ def load_config(config: Config) -> Config:
     old_config.env.port_increment = config.env.port_increment
     return old_config
 
-def save_config(config: Config):
-    if not os.path.exists(f'{config.env.save_path}{config.agent.save_name}'):
-        os.makedirs(f'{config.env.save_path}{config.agent.save_name}')
-    with open(f'{config.env.save_path}{config.agent.save_name}/config.pkl', 'wb') as f:
+def save_config(config: Config) -> None:
+    if not os.path.exists(f'output/{config.agent.save_name}'):
+        os.makedirs(f'output/{config.agent.save_name}')
+
+    with open(f'output/{config.agent.save_name}/config.pkl', 'wb') as f:
         pickle.dump(config, f)
 
 
@@ -61,11 +63,6 @@ if __name__ == '__main__':
     else:
         config = Config(override=args.__dict__)
         config.logging.run_id = False
-    
-    if config.agent.evaluate:
-        config = load_config(config)
-    else:
-        save_config(config)
 
     if config.logging.wandb and wandb:
         wandb.init(project=args.wandb, name=args.wandb_run_name, resume=config.logging.run_id, config=args)
@@ -73,6 +70,12 @@ if __name__ == '__main__':
             config.agent.save_name = config.logging.wandb_run_name
     else:
         wandb = None
+
+    if config.agent.evaluate:
+        config = load_config(config)
+    else:
+        save_config(config)
+    
     config.logging.wandb = wandb
     config.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

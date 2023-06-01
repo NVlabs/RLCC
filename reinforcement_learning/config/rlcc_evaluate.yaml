@@ -1,16 +1,24 @@
 env:
   scenarios:
-    - "64_128_m2o_s"
+    # - "4_1_m2o_s"
+    # - "2_1_m2o_s"
+    # - "8_1_m2o_s"
+    # - "32_1_m2o_s"
+    # - "4_16_a2a_s"
+    # - "4_8_a2a_s"
+    # - "8_8_a2a_s"
+    # - "8_16_a2a_s"
+    # - "64_128_m2o_s"
+    - "64_128_m2o_m"
   envs_per_scenario: 1
-  port_increment: 10
-  save_path: 'output/'  # relative path to reinforcement learning
+  port_increment: 30
   verbose: True
   restart_on_end: false
-  multiprocess: True
+  multiprocess: false
 
 agent:
-  save_name: 'debug'
-  checkpoint: '2048'
+  save_name: 'demo_model'
+  checkpoint: '3270794'
   evaluate: True
 
 logging:

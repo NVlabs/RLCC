@@ -24,10 +24,9 @@ class Server:
         self.config = config
         self.port = port
         self.server_socket = self.open_server_socket(port=self.port)
-        self.server_socket.settimeout(300)
         self.connection, self.client_address = None, None
 
-    def step(self, action) -> RawFeatures:
+    def step(self, action, p) -> RawFeatures:
         """
         Send the action to the simulator, receive and parse the new data.
         :param action: The multiplier by which we change the send rate.
@@ -35,7 +34,10 @@ class Server:
         """
         self.send_data(action)
         self.close_connection()
-        return self.receive_data()
+        
+        if p.poll() is None:
+            return self.receive_data()
+        self.end_connection()
 
     def receive_data(self) -> RawFeatures:
         """
@@ -93,17 +95,19 @@ class Server:
 
     def reset(self) -> RawFeatures:
         try:
-            return self.receive_data()
+            data =  self.receive_data()
+            self.server_socket.settimeout(10)
+            return data
         except:
             print("restarting env")
             self.server_socket = self.open_server_socket(port=self.port)
-            self.server_socket.settimeout(300)
+            self.server_socket.settimeout(500)
             return self.receive_data()
 
     @staticmethod
     def open_server_socket(port: int, host: str = 'localhost') -> socket.socket:
         serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         serversocket.bind((host, port))
-        serversocket.listen(300)
+        serversocket.listen(500)
         return serversocket
 

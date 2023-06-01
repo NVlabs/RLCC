@@ -1,16 +1,14 @@
 env:
   scenarios:
     - "4_1_m2o_l"
-    - "4_16_m2o_l"
     - "8_1_m2o_l"
+    - "32_1_m2o_l"
     - "4_16_a2a_l"
-    - "8_8_a2a_l"
-    - "8_16_a2a_l"
+    - "4_8_a2a_l"
   envs_per_scenario: 1
   history_length: 2
   reward: adpg_reward
   port_increment: 10
-  save_path: '../../reinforcement_learning/output/'  # relative path to nv_ccsim/sim/
   verbose: False
   restart_on_end: True
   multiprocess: False
@@ -35,7 +33,7 @@ agent:
   adpg:
     action_multiplier_dec: 0.2
     action_multiplier_inc: 0.2
-    rollout_length: 3
+    rollout_length: 15
     architecture:
       - 12
       - 12
@@ -48,7 +46,7 @@ agent:
     bias: False
     loss_batch: 0 # use batch of agents in rollout instead of all agents
     max_batch_size: 8192
-    max_step_size: 5000
+    max_step_size: 8000
     warmup_length: 1024
     warmup_updates: 50
 
@@ -58,5 +56,5 @@ logging:
   run_id: ''
   log_interval: 1024 # The minimum number of iterations before each log occurs
   limit_flows: False
-  limit_hosts: 3
-  limit_qps: 3
+  limit_hosts: 2
+  limit_qps: 2

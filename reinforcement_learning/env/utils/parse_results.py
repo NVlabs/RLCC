@@ -5,58 +5,64 @@ import pandas as pd
 
 import json
 
-from .sca_parser import eval_sim_run
+try:
+    from .sca_parser import eval_sim_run
+except ImportError:
+    from sca_parser import eval_sim_run
 
 
-data_title = ['#Hosts', '#QPs', '#Flows', 'Switch BW', 'BW per QP','Host BW', 'Goodput BW', 'Fairness [min host bw / max]' ,  'Latency [usec]', 'Packet loss [Gbit/s]', 'Dropped MB']
+data_title = ['#Hosts', '#QPs', '#Flows', 'Switch BW','Host BW', 'Goodput BW', 'Fairness [min host bw / max]' ,  'Latency [usec]', 'Packet loss [Gbit/s]', 'Dropped MB']
 
 long_short_data_title = ['#Hosts', '#QPs', '#Flows', 'Long BW]', 'Long Goodput BW', 'Completion Time', 'Packet Loss', 'Dropped MB']
-RESULTS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'NVIDIACCSim/sim/results')
+RESULTS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'nv_ccsim/sim/results')
 
 def parse_many_to_one(data):
     if data is None:
         return None
-
-    total_bw = np.mean(data['switch_bw'])
-    bw_per_qp = np.mean(data['bw_per_qp'])
-    host_bw = np.mean(data['host_bw'])
-    fairness = np.min(data['host_bw']) / np.max(data['host_bw'])
-    latency = np.mean(data['latency'])
-    dropped_bw = np.mean(data['dropped_bw'])
-    total_drop = np.mean(data['total_drop'])
-    goodput = np.mean(data['goodput'])
-    
-    print(f'Throughput BW: \t\t {total_bw} [Gbps]')
-    print(f'BW per QP: \t\t {bw_per_qp} [Gbps]')
-    print(f'Goodput BW: \t\t {goodput} [Gbps]')
-    print(f'Fairness : \t\t {fairness}')
-    print(f'Packet Latency:  \t {latency} [micro sec]')
-    print(f'Packet loss: \t\t {dropped_bw} [Gbps]')
-    print(f'Total Mb dropped: \t {total_drop} [Mb]')
-    # return [total_bw, host_fairness, latency, dropped_bw, data[3], data[4], data[5]]
-    return [total_bw, bw_per_qp, host_bw, goodput, fairness, latency, dropped_bw, total_drop]
+    try:
+        total_bw = np.mean(data['switch_bw'])
+        host_bw = np.mean(data['host_bw'])
+        fairness = np.min(data['host_bw']) / np.max(data['host_bw'])
+        latency = np.mean(data['latency'])
+        dropped_bw = np.mean(data['dropped_bw'])
+        total_drop = np.mean(data['total_drop'])
+        goodput = np.mean(data['goodput'])
+        
+        print(f'Throughput BW: \t\t {total_bw} [Gbps]')
+        print(f'Goodput BW: \t\t {goodput} [Gbps]')
+        print(f'Host BW: \t\t {host_bw} [Gbps]')
+        print(f'Fairness : \t\t {fairness}')
+        print(f'Packet Latency:  \t {latency} [micro sec]')
+        print(f'Packet loss: \t\t {dropped_bw} [Gbps]')
+        print(f'Total Mb dropped: \t {total_drop} [Mb]')
+        return [total_bw, host_bw, goodput, fairness, latency, dropped_bw, total_drop]
+    except Exception as e:
+        print(str(e))
+        return None
 
 def parse_data_all_to_all(data):
     if data is None:
         return None
-    total_bw = np.mean(data['switch_bw'])
-    bw_per_qp = np.mean(data['bw_per_qp'])
-    host_bw = np.mean(data['host_bw'])
-    fairness = np.min(data['host_bw']) / np.max(data['host_bw'])
-    latency = np.mean(data['latency'])
-    dropped_bw = np.mean(data['dropped_bw'])
-    total_drop = np.mean(data['total_drop'])
-    goodput = np.mean(data['goodput'])
-    
-    print(f'Output BW: \t\t {total_bw} [Gbps]')
-    print(f'BW per QP: \t\t {bw_per_qp} [Gbps]')
-    print(f'Goodput BW: \t\t {goodput} [Gbps]')
-    print(f'Fairness : \t\t {fairness}')
-    print(f'Packet Latency:  \t {latency} [micro sec]')
-    print(f'Packet loss: \t\t {dropped_bw} [Gbps]')
-    print(f'Total Mb dropped: \t {total_drop} [Mb]')
-    # return [total_bw, host_fairness, latency, dropped_bw, data[3], data[4], data[5]]
-    return [total_bw, bw_per_qp, host_bw, goodput, fairness, latency, dropped_bw, total_drop]
+    try: 
+        total_bw = np.mean(data['switch_bw'])
+        host_bw = np.mean(data['host_bw'])
+        fairness = np.min(data['host_bw']) / np.max(data['host_bw'])
+        latency = np.mean(data['latency'])
+        dropped_bw = np.mean(data['dropped_bw'])
+        total_drop = np.mean(data['total_drop'])
+        goodput = np.mean(data['goodput'])
+        
+        print(f'Throughput BW: \t\t {total_bw} [Gbps]')
+        print(f'Goodput BW: \t\t {goodput} [Gbps]')
+        print(f'Host BW: \t\t {host_bw} [Gbps]')
+        print(f'Fairness : \t\t {fairness}')
+        print(f'Packet Latency:  \t {latency} [micro sec]')
+        print(f'Packet loss: \t\t {dropped_bw} [Gbps]')
+        print(f'Total Mb dropped: \t {total_drop} [Mb]')
+        return [total_bw, host_bw, goodput, fairness, latency, dropped_bw, total_drop]
+    except Exception as e:
+        print(str(e))
+        return None
 
 
 def parse_longshort(data):
@@ -112,4 +118,42 @@ def parse_results(filename):
     scenario_data = [hosts, qps, hosts*qps] + scenario_data
     df = pd.DataFrame([scenario_data], columns= data_title if 'LongShort'  not in filename else long_short_data_title, index=['summary statistics'])
     df.to_csv(os.path.join(RESULTS_PATH, filename.replace('.sca', '.csv')))
+
+def parse_steady_state_files():
+    sca_files = [f for f in os.listdir(RESULTS_PATH) if '.sca' in f]
+    with open(os.path.join(os.path.dirname(__file__), 'metrics.json'), 'r') as f:
+        relevant_info = json.load(f)
+
+    sca_data = {}
+    for filename in sca_files:
+        if 'ManyToOne' in filename:
+            file_info = relevant_info['many-to-one']
+            parse_data_func = parse_many_to_one
+        elif 'AllToAll' in filename:
+            file_info = relevant_info['all-to-all']
+            parse_data_func = parse_data_all_to_all
+        try:
+            eval_info = eval_sim_run(RESULTS_PATH, filename, file_info['metrics'], file_info['params'])
+            test = '{}_{}_{}'.format(eval_info['params']['hosts'], eval_info['params']['qps'], eval_info['flag'])
+        except Exception as e:
+            print(str(e))
+            continue
+
+        hosts, qps = eval_info['params']['hosts'], eval_info['params']['qps']
+        print(f'Algorithm: {filename}, {hosts*qps} Flows : {hosts} Hosts, {qps} QPs per Host\n')
+        scenario_data = parse_data_func(eval_info['measurements'])
+        if scenario_data is None:
+            print('Failed To get Data')
+            continue
+        scenario_data = [hosts, qps, hosts*qps] + scenario_data
+        sca_data[filename.replace('.sca', '')] = scenario_data
+
+    df = pd.DataFrame(sca_data.values(), columns= data_title, index=sca_data.keys())
+    df.to_csv(os.path.join(RESULTS_PATH, 'steady_summary.csv'))
+
+
+
+if __name__ == '__main__':
+    print("parsing results from all sca files")
+    parse_steady_state_files()
 
