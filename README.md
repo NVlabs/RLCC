@@ -17,12 +17,33 @@ The configuration file contains the three available scenarios: many-to-one, all-
 ***it is advised to modify the configurations only if you are familiar with the omnest simulator!***
 
 ## 2. Installation   
+First, clone the project: 
+```
+git clone https://github.com/NVlabs/RLCC.git
+```
+### 2a. Docker
+The docker setup here assumes access to an nvidia-based docker with pytorch and cuda. However, any other standard pytorch docker should suffice too.
+
+Prerequisites:
+- Docker 19 or newer.
+- Access to NVIDIA Docker Catalog. Visit the [NGC website](https://ngc.nvidia.com/signup) and follow the instructions. This will grant you access to the base docker image (from the Dockerfile) and ability to run on NVIDIA GPU using the nvidia runtime flag.
+
+1. CD to project dir and build the docker image:
+```
+docker build -t rlcc .
+```
+
+2. Run the image: 
+```
+docker run --runtime=nvidia -it rlcc /bin/bash
+```
+
+### 2b. Local installation
 Before installing RL-CC make sure to install Python version >= 3.7.
 
-To install run
-```cmd
-1. git clone https://gitlab-master.nvidia.com/bfuhrer/rl-cc-demo.git  
-2. pip install -r requirements.txt
+Install requirements by running
+```
+pip install -r requirements.txt
 ```
  
 ## 3. Running RL-CC 
