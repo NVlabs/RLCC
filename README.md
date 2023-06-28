@@ -91,8 +91,7 @@ Usage Examples:
 
 ### 3.3 Training RL-CC
 RL-CC is trained for a pre-specified number of policy updates. After each update, the policy is saved as a checkpoint that corresponds to the total number of steps taken in the environment since the beginning.
-RL-CC training monitoring is done through weights and biases. The following parameters are logged and are used to determine model convergance: ***nack_ratio, cnp_ratio, rate, adpg_reward, rtt_inflation, bandwidth, bytes_sent, action, and loss***. 
-For best results, we recommended training on many-to-one and all-to-all scenarios with long durations.  
+RL-CC training monitoring is done through weights and biases. The following parameters are logged and are used to determine model convergance: ***nack_ratio, cnp_ratio, rate, adpg_reward, rtt_inflation, bandwidth, bytes_sent, action, and loss***.  
 Below is the full list of training parameters. 
 ```yaml
 ## Training parameters
@@ -174,16 +173,16 @@ verbose:                 "verbosity level of CCsim output (recommended verbose=T
 
 ### 3.5 CLI Examples
 Example of training an ADPG model from the command line on the following scenarios:
-- 2 hosts 1 qp per host many-to-one long simulation
-- 16 hosts 8 qps per host many-to-one long simulation
-- 4 hosts 4 qps per host all-to-all long simulation
+- 2 hosts 1 qp per host many-to-one
+- 16 hosts 8 qps per host many-to-one
+- 4 hosts 4 qps per host all-to-all
 ```bash
 python3 run.py --envs_per_scenario 1 --agent ADPG --scenarios 2_1_m2o_train 16_8_m2o_train 4_4_a2a_train --agent_features action adpg_reward --port_increment 0 --config rlcc
 ```
 Example of evaluating an ADPG model from the command line on the following scenario:
 - 64 hosts 128 QPs per host many-to-one short simulation scenario.
 ```bash
-python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>  --learning_rate 0.01 --history_length 2 --agent ADPG --scenarios 64_128_m2o_s --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc_evaluate  --evaluate
+python3 run.py --envs_per_scenario 1  --learning_rate 0.01 --history_length 2 --agent ADPG --scenarios 64_128_m2o_eval --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc_evaluate  --evaluate
 ```
 
 
@@ -216,12 +215,3 @@ numpages = {4}
 [1] Tessler, C., Shpigelman, Y., Dalal, G., Mandelbaum, A., Kazakov, D. H., Fuhrer, B., Chechik, G., & Mannor, S. (2021). Reinforcement Learning for Datacenter Congestion Control. http://arxiv.org/abs/2102.09337. arXiv:2102.09337.  
 
 [2] Fuhrer, B., Shpigelman, Y., Tessler, C., Mannor, S., Chechik, G., Zahavi, E., Dalal, G. (2022). Implementing Reinforcement Learning Datacenter Congestion Control in NVIDIA NIC. https://arxiv.org/abs/2207.02295. 	arXiv:2207.02295.
-
-
-<!-- Vector files takes a lot of memory space (~7GB per file).
-
-To define if the run will have vectors file output or not we use the configuration set in the relevant ccsim.ini file (located in ./simulator/sim/ccsim.ini). For example to run our algo without vectors we will config the run to be Config RL_ShortSimult_ManyToOne and with vectors we will define the run to be Config  RL_ShortSimult_ManyToOne_Vectors. While runing the code from python we will config the run using the relevant configuration file located in ./config -->
-
-<!-- # TO DOs -->
-<!-- * Write advanced simulator usage (vector files, explain .ini file (or maybe we shouldn't)) -->
-<!-- * test and train other algos than RL-CC -->
