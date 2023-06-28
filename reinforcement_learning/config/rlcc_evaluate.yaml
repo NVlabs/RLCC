@@ -1,15 +1,14 @@
 env:
   scenarios:
-    # - "4_1_m2o_s"
-    # - "2_1_m2o_s"
-    # - "8_1_m2o_s"
-    # - "32_1_m2o_s"
-    # - "4_16_a2a_s"
-    # - "4_8_a2a_s"
-    # - "8_8_a2a_s"
-    # - "8_16_a2a_s"
-    # - "64_128_m2o_s"
-    - "64_128_m2o_m"
+    - "4_1_m2o_eval"
+    # - "2_1_m2o_eval"
+    # - "8_1_m2o_eval"
+    # - "32_1_m2o_eval"
+    # - "4_16_a2a_eval"
+    # - "4_8_a2a_eval"
+    # - "8_8_a2a_eval"
+    # - "8_16_a2a_eval"
+    # - "64_128_m2o_eval"
   envs_per_scenario: 1
   port_increment: 30
   verbose: True

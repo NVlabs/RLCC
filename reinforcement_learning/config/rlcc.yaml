@@ -1,10 +1,10 @@
 env:
   scenarios:
-    - "4_1_m2o_l"
-    - "8_1_m2o_l"
-    - "32_1_m2o_l"
-    - "4_16_a2a_l"
-    - "4_8_a2a_l"
+    - "4_1_m2o_train"
+    - "8_1_m2o_train"
+    - "32_1_m2o_train"
+    - "4_16_a2a_train"
+    - "4_8_a2a_train"
   envs_per_scenario: 1
   history_length: 2
   reward: adpg_reward
@@ -12,7 +12,6 @@ env:
   verbose: False
   restart_on_end: True
   multiprocess: False
-
 
 training:
   max_num_updates: 1000

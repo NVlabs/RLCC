@@ -15,24 +15,18 @@ from .utils.feature_history import FeatureHistory
 from .utils.parse_results import parse_results
 from .utils.server import Server
 
-scenario_types = {"l": 'LongSimult', 'm': 'MediumSimult', 's': 'ShortSimult'}
-
 def parse_scenario(scenario):
-    scenario_name = 'RL_'
-    if 'vec' in scenario:
-        assert len(scenario) > 4 and scenario[-4:] == '_vec', "scenario name must end with _vec to use vectors" 
-        if 'm2o' in scenario or 'a2a' in scenario:
-            assert '_m_vec' in scenario in '_s_vec', "must specify scenario type: _s_vec, _m_vec, no long simult with vectors"
-        scenario_name += scenario_types[scenario.replace('_vec', '')[-1]] + '_Vectors'
-    elif 'm2o' in scenario or 'a2a' in scenario:
-        assert len(scenario) > 2 and scenario[-2:] in ['_s', '_m', '_l'], "must specify scenario type: _l, _s, _m" 
-        scenario_name += scenario_types[scenario[-1]]
+    scenario_name = 'RL'
+    scenario_name = scenario_name + '_Train' if 'train' in scenario else scenario_name + '_Eval' 
     if 'm2o' in scenario:
         scenario_name += '_ManyToOne'
     elif 'a2a' in scenario:
         scenario_name += '_AllToAll'
     else:
-        scenario_name += 'LongShort'
+        scenario_name += '_LongShort'
+    if 'vec' in scenario:
+        assert 'eval' in scenario, "Vectors must only be run in eval mode --> must specify scenario type: _eval_vec or _vec_eval"
+        scenario += '_Vectors'
     return scenario_name
 
 class OMNeTpp(gym.Env):
@@ -43,7 +37,8 @@ class OMNeTpp(gym.Env):
         This wrapper will maintain the history and information over all observed agents.
     """
     def __init__(self, scenario: str, simulation_number: int, env_number: int, config: Config):
-        assert 'm2o' in scenario or 'a2a' in scenario or 'ls' in scenario, "Scenario name must contain either: m2o/a2a/ls"
+        assert "m2o" in scenario or "a2a" in scenario or "longshort" in scenario, "Scenario not recognized! Please ensure that 'm2o' or 'a2a' or 'longshort' is in the scenario name!"
+        assert 'eval' in scenario or 'train' in scenario, "must specify scenario type as train or test: please add _eval or _train" 
         self.config = config
         self.simulation_number = simulation_number
         self.scenario = scenario
@@ -57,8 +52,8 @@ class OMNeTpp(gym.Env):
             test_number, config_num_tests = py_to_c_scenarios['m2o'][host_qps]
         elif 'a2a' in scenario:
                     test_number, config_num_tests = py_to_c_scenarios['a2a'][host_qps]
-        elif 'ls' in scenario:
-                    test_number, config_num_tests = py_to_c_scenarios['ls'][host_qps]
+        elif 'longshort' in scenario:
+                    test_number, config_num_tests = py_to_c_scenarios['longshort'][host_qps]
  
 
         self.scenario_name = parse_scenario(scenario)

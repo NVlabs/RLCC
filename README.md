@@ -80,13 +80,14 @@ multiprocess:        "run RL-CC on multiple processes in parallel"
 port_increment:      "RL-CC interacts with the NVIDIA CC simulator via a TCP socket. 
                       port_increment specifies which port to connect to."
 ```
-Specifying CC scenarios is done the following format: `<num_hosts>_<num_qps_per_hosts>_<scenario_type>_<test_duration>`.
-The `<scenario_type>` choices are: `m2o` for many-to-one, `a2a` for all-to-all, `ls` for long-short. The `<test_duration>` choices are: `s` for a short duration (200 ms), `m` for a medium duration (1 sec), `l` for a long duration (10000 sec). When choosing CC scenarios, only a specific set of <num_hosts>_<num_qps_per_hosts> combinations ara possible, see `reinforcement_learning/configs/constants.py` for available combinations. Also, for the long-short scenario, the test duration does not need to be specified.
+Specifying CC scenarios is done the following format: `<num_hosts>_<num_qps_per_hosts>_<scenario_type>_<test_type>`.
+The `<scenario_type>` choices are: `m2o` for many-to-one, `a2a` for all-to-all, `longshort` for long-short. The `<test_type>` choices are: `train` for training, `eval` for evaluation. When choosing CC scenarios, only a specific set of <num_hosts>_<num_qps_per_hosts> combinations ara possible, see `reinforcement_learning/configs/constants.py` for available combinations.  
+Users that are familiar with the OMNeT++ simulator can generate vector files in evaluation mode by specifying `_eval_vec` as the test type. 
 
 Usage Examples: 
-- many-to-one with 2 hosts and 1 qp per host for training - `2_1_m2o_l` 
-- all-to-all with 4 hosts and 8 qp per host for training - `4_8_a2a_l`
-- long-short with  1 long flow, 7 short flows and 8 qps per flow for test - `8_8_ls`
+- many-to-one with 2 hosts and 1 qp per host for training - `2_1_m2o_train` 
+- all-to-all with 4 hosts and 8 qp per host for training - `4_8_a2a_train`
+- long-short with  1 long flow, 7 short flows and 8 qps per flow for evaluation - `8_8_longshort_eval`
 
 ### 3.3 Training RL-CC
 RL-CC is trained for a pre-specified number of policy updates. After each update, the policy is saved as a checkpoint that corresponds to the total number of steps taken in the environment since the beginning.
@@ -177,7 +178,7 @@ Example of training an ADPG model from the command line on the following scenari
 - 16 hosts 8 qps per host many-to-one long simulation
 - 4 hosts 4 qps per host all-to-all long simulation
 ```bash
-python3 run.py --envs_per_scenario 1 --wandb <project_name> --wandb_run_name <wandb_run_name>   --agent ADPG --scenarios 2_1_m2o_l 16_8_m2o_l 4_4_a2a_l --save_name <model_name> --agent_features action adpg_reward --port_increment 0 --config rlcc
+python3 run.py --envs_per_scenario 1 --agent ADPG --scenarios 2_1_m2o_train 16_8_m2o_train 4_4_a2a_train --agent_features action adpg_reward --port_increment 0 --config rlcc
 ```
 Example of evaluating an ADPG model from the command line on the following scenario:
 - 64 hosts 128 QPs per host many-to-one short simulation scenario.
