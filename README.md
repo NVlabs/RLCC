@@ -1,6 +1,6 @@
 # Reinforcement Learning for Datacenter Congestion Control
 RL-CC is an RDMA congestion control algorithm trained with the analytical deterministic policy gradient method (ADPG) [Tessler et al. (IAAI 2022)](https://ojs.aaai.org/index.php/AAAI/article/view/21535).  
-This repository conatins the source code and simulator used to train RL-CC for [Tessler et al. (IAAI 2022)](https://ojs.aaai.org/index.php/AAAI/article/view/21535) and [Fuhrer et al. (CCGrid 2023)](https://arxiv.org/pdf/2207.02295.pdf). 
+This repository conatins the source code and simulator used to train RL-CC for [Tessler et al. (IAAI 2022)](https://ojs.aaai.org/index.php/AAAI/article/view/21535) and [Fuhrer et al. (CCGrid 2023)](https://ieeexplore.ieee.org/document/10171517). 
 
 
 ## 1. About the NVIDIA ConnectX-6Dx CC Simulator
